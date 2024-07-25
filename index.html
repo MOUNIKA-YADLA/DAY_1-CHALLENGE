@@ -1,0 +1,97 @@
+<!DOCTYPE html>
+<html lang="en">
+  <head>
+    <style>
+      body {
+        font-family: "Arial", sans-serif;
+        display: flex;
+        justify-content: center;
+        align-items: center;
+        height: 100vh;
+        margin: 0;
+        background: linear-gradient(to right, #373e75, #5077ca);
+      }
+
+      .container {
+        text-align: center;
+        background: #fff;
+        padding: 40px;
+        border-radius: 15px;
+        box-shadow: 0 10px 20px rgba(0, 0, 0, 0.2);
+        max-width: 500px;
+        margin: 20px;
+      }
+
+      h1 {
+        color: #333;
+        margin-bottom: 20px;
+      }
+
+      #quote-box {
+        background: #f1f1f1;
+        padding: 20px;
+        border-radius: 10px;
+        margin-bottom: 20px;
+        font-size: 1.2em;
+        color: #555;
+        min-height: 100px;
+        display: flex;
+        justify-content: center;
+        align-items: center;
+        box-shadow: 0 10px 20px rgba(0, 0, 0, 0.1);
+        transition: background 0.5s ease, box-shadow 0.5s ease;
+        border: 2px solid transparent;
+      }
+
+      #quote-box:hover {
+        background: linear-gradient(to right, #c2e9fb, #a1c4fd);
+        box-shadow: 0 20px 40px rgba(0, 0, 0, 0.2);
+        border-color: #007bff;
+      }
+      button {
+        padding: 15px 30px;
+        border: none;
+        background-color: #007bff;
+        color: white;
+        border-radius: 25px;
+        font-size: 1em;
+        cursor: pointer;
+        transition: background-color 0.3s ease;
+      }
+
+      button:hover {
+        background-color: #0056b3;
+      }
+
+      button:active {
+        transform: scale(0.95);
+        box-shadow: 0 5px 10px rgba(0, 0, 0, 0.2);
+      }
+
+      @media (max-width: 600px) {
+        .container {
+          padding: 20px;
+        }
+
+        button {
+          padding: 10px 20px;
+          font-size: 0.9em;
+        }
+      }
+    </style>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>Random Quote Generator</title>
+    <link rel="stylesheet" href="styles.css" />
+  </head>
+  <body>
+    <div class="container">
+      <h1>Random Quote Generator</h1>
+      <div id="quote-box">
+        <p id="quote">Press the button to generate a quote.</p>
+      </div>
+      <button onclick="generateQuote()">New Quote</button>
+    </div>
+    <script src="script.js"></script>
+  </body>
+</html>
