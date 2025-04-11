@@ -1,0 +1,153 @@
+<!DOCTYPE html>
+<html lang="en" xmlns:th="http://www.thymeleaf.org" xmlns:sec="https://www.thymeleaf.org/thymeleaf-extras-springsecurity5">
+<head>
+  <meta charset="UTF-8">
+  <title>Dashboard - Bank Account Management</title>
+  <link rel="stylesheet" href="https://stackpath.bootstrapcdn.com/bootstrap/4.5.2/css/bootstrap.min.css">
+  <link href="https://fonts.googleapis.com/css2?family=Roboto:wght@400;700&display=swap" rel="stylesheet">
+  <style>
+    body {
+      background: linear-gradient(to right, #f8f9fa, #e9ecef);
+      font-family: 'Roboto', sans-serif;
+    }
+
+    .dashboard-container {
+      padding: 30px;
+      margin-top: 30px;
+    }
+
+    .dashboard-title {
+      font-weight: 700;
+      color: #343a40;
+      text-align: center;
+      margin-bottom: 30px;
+    }
+
+    .dashboard-card {
+      background: white;
+      border-radius: 12px;
+      box-shadow: 0 6px 16px rgba(0, 0, 0, 0.1);
+      padding: 25px;
+      transition: 0.3s;
+      height: 100%;
+    }
+
+    .dashboard-card:hover {
+      transform: translateY(-5px);
+      box-shadow: 0 12px 25px rgba(0, 0, 0, 0.2);
+    }
+
+    .dashboard-card h5 {
+      font-weight: 600;
+      color: #007bff;
+    }
+
+    .carousel-inner img {
+      border-radius: 12px;
+      height: 250px;
+      object-fit: cover;
+    }
+
+    .logout-link {
+      float: right;
+      color: #dc3545;
+      font-weight: bold;
+      margin-right: 10px;
+    }
+
+    .logout-link:hover {
+      color: #a71d2a;
+      text-decoration: underline;
+    }
+  </style>
+</head>
+<body>
+  <div class="container">
+    <!-- Logout Section -->
+    <div sec:authorize="isAuthenticated()" class="mt-4">
+      <form id="logoutForm" method="POST" th:action="@{/logout}">
+        <input type="hidden" name="${_csrf.parameterName}" value="${_csrf.token}" />
+      </form>
+      <h5>
+        Welcome <span sec:authentication="name"></span>
+        <a href="#" class="logout-link" onclick="document.forms['logoutForm'].submit()">Logout</a>
+      </h5>
+    </div>
+
+    <!-- Carousel -->
+    <div id="dashboardCarousel" class="carousel slide mt-4" data-ride="carousel">
+      <div class="carousel-inner">
+        <div class="carousel-item active">
+          <img src="https://source.unsplash.com/1200x300/?bank,technology" class="d-block w-100" alt="Bank">
+        </div>
+        <div class="carousel-item">
+          <img src="https://source.unsplash.com/1200x300/?finance,data" class="d-block w-100" alt="Data">
+        </div>
+        <div class="carousel-item">
+          <img src="https://source.unsplash.com/1200x300/?money,report" class="d-block w-100" alt="Reports">
+        </div>
+      </div>
+      <a class="carousel-control-prev" href="#dashboardCarousel" role="button" data-slide="prev">
+        <span class="carousel-control-prev-icon" aria-hidden="true"></span>
+      </a>
+      <a class="carousel-control-next" href="#dashboardCarousel" role="button" data-slide="next">
+        <span class="carousel-control-next-icon" aria-hidden="true"></span>
+      </a>
+    </div>
+
+    <!-- Dashboard Section -->
+    <div class="dashboard-container">
+      <h2 class="dashboard-title">Bank Account Management</h2>
+      <div class="row">
+        <div class="col-md-4 mb-4">
+          <div class="dashboard-card text-center">
+            <h5>Upload Excel</h5>
+            <p>Bulk upload bank account details using Excel.</p>
+            <a href="/upload-excel" class="btn btn-primary">Upload Now</a>
+          </div>
+        </div>
+        <div class="col-md-4 mb-4">
+          <div class="dashboard-card text-center">
+            <h5>View Accounts</h5>
+            <p>Check all bank accounts with filters and details.</p>
+            <a href="/accounts" class="btn btn-success">View</a>
+          </div>
+        </div>
+        <div class="col-md-4 mb-4">
+          <div class="dashboard-card text-center">
+            <h5>Download Reports</h5>
+            <p>Download PDF reports for accounts and transactions.</p>
+            <a href="/reports" class="btn btn-dark">Download</a>
+          </div>
+        </div>
+
+        <div class="col-md-4 mb-4">
+          <div class="dashboard-card text-center">
+            <h5>Add New Account</h5>
+            <p>Create a new bank account for customers.</p>
+            <a href="/accounts/add" class="btn btn-warning">Add</a>
+          </div>
+        </div>
+        <div class="col-md-4 mb-4">
+          <div class="dashboard-card text-center">
+            <h5>View Transactions</h5>
+            <p>Review recent transactions and activity history.</p>
+            <a href="/history" class="btn btn-secondary">History</a>
+          </div>
+        </div>
+        <div class="col-md-4 mb-4">
+          <div class="dashboard-card text-center">
+            <h5>Contact Support</h5>
+            <p>Need help? Contact the support team for assistance.</p>
+            <a href="/contact" class="btn btn-info">Support</a>
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <!-- Bootstrap JS (for carousel) -->
+  <script src="https://code.jquery.com/jquery-3.5.1.slim.min.js"></script>
+  <script src="https://cdn.jsdelivr.net/npm/bootstrap@4.5.2/dist/js/bootstrap.bundle.min.js"></script>
+</body>
+</html>
