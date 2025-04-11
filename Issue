@@ -1,0 +1,152 @@
+<!DOCTYPE html>
+<html lang="en" xmlns:th="http://www.thymeleaf.org" xmlns:sec="https://www.thymeleaf.org/thymeleaf-extras-springsecurity5">
+<head>
+  <meta charset="UTF-8">
+  <title>Dashboard - Bank Account Management</title>
+  <link rel="stylesheet" href="https://stackpath.bootstrapcdn.com/bootstrap/4.5.2/css/bootstrap.min.css">
+  <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+  <style>
+    body {
+      background: linear-gradient(120deg, #f0f4f8, #d9e2ec);
+      font-family: 'Segoe UI', sans-serif;
+    }
+
+    .navbar {
+      background-color: #003366;
+    }
+
+    .navbar-brand, .nav-link, .logout-link {
+      color: white !important;
+    }
+
+    .dashboard-header {
+      text-align: center;
+      padding: 40px 20px 20px 20px;
+    }
+
+    .dashboard-header h2 {
+      font-weight: bold;
+      color: #003366;
+    }
+
+    .dashboard-card {
+      border-radius: 12px;
+      background: white;
+      box-shadow: 0 4px 10px rgba(0, 0, 0, 0.1);
+      padding: 25px;
+      text-align: center;
+      transition: transform 0.3s;
+    }
+
+    .dashboard-card:hover {
+      transform: translateY(-5px);
+      box-shadow: 0 6px 15px rgba(0, 0, 0, 0.15);
+    }
+
+    .dashboard-card i {
+      font-size: 40px;
+      margin-bottom: 15px;
+      color: #003366;
+    }
+
+    .footer {
+      background-color: #003366;
+      color: white;
+      padding: 20px 0;
+      text-align: center;
+      margin-top: 40px;
+    }
+
+    .btn-custom {
+      margin-top: 15px;
+    }
+  </style>
+</head>
+<body>
+
+<!-- Navbar -->
+<nav class="navbar navbar-expand-lg">
+  <div class="container">
+    <a class="navbar-brand" href="#"><i class="fas fa-university"></i> Bank Dashboard</a>
+    <div class="ml-auto">
+      <span class="text-white mr-3">Welcome Mounika</span>
+      <a href="#" onclick="document.getElementById('logoutForm').submit()" class="logout-link">Logout</a>
+      <form id="logoutForm" method="POST" th:action="@{/logout}" style="display: none;">
+        <input type="hidden" name="${_csrf.parameterName}" value="${_csrf.token}" />
+      </form>
+    </div>
+  </div>
+</nav>
+
+<!-- Header -->
+<div class="dashboard-header">
+  <h2><i class="fas fa-tachometer-alt"></i> Bank Account Management Dashboard</h2>
+  <p>Manage your bank accounts efficiently with bulk upload, reports, and transactions.</p>
+</div>
+
+<!-- Dashboard Cards -->
+<div class="container">
+  <div class="row">
+    <div class="col-md-4 mb-4">
+      <div class="dashboard-card">
+        <i class="fas fa-file-upload"></i>
+        <h5>Upload Excel File</h5>
+        <p>Upload bulk bank account details using an Excel file.</p>
+        <a href="/upload-excel" class="btn btn-primary btn-custom">Upload Now</a>
+      </div>
+    </div>
+    <div class="col-md-4 mb-4">
+      <div class="dashboard-card">
+        <i class="fas fa-table"></i>
+        <h5>View Bank Accounts</h5>
+        <p>Check all bank accounts with details and filters.</p>
+        <a href="/accounts" class="btn btn-success btn-custom">View Accounts</a>
+      </div>
+    </div>
+    <div class="col-md-4 mb-4">
+      <div class="dashboard-card">
+        <i class="fas fa-download"></i>
+        <h5>Download Reports</h5>
+        <p>Generate and download financial reports easily.</p>
+        <a href="/reports" class="btn btn-info btn-custom">Download Reports</a>
+      </div>
+    </div>
+
+    <div class="col-md-4 mb-4">
+      <div class="dashboard-card">
+        <i class="fas fa-user-plus"></i>
+        <h5>Add New Account</h5>
+        <p>Create a new bank account for users.</p>
+        <a href="/accounts/add" class="btn btn-warning btn-custom">Add Account</a>
+      </div>
+    </div>
+    <div class="col-md-4 mb-4">
+      <div class="dashboard-card">
+        <i class="fas fa-history"></i>
+        <h5>View Transactions</h5>
+        <p>See recent account transactions and history.</p>
+        <a href="/history" class="btn btn-secondary btn-custom">View Transactions</a>
+      </div>
+    </div>
+    <div class="col-md-4 mb-4">
+      <div class="dashboard-card">
+        <i class="fas fa-headset"></i>
+        <h5>Contact Support</h5>
+        <p>Need help? Get in touch with our support team.</p>
+        <a href="/contact" class="btn btn-danger btn-custom">Contact Us</a>
+      </div>
+    </div>
+  </div>
+</div>
+
+<!-- Footer -->
+<div class="footer">
+  <p>&copy; 2025 Bank Account Management System | Built with <i class="fas fa-heart text-danger"></i> by Mounika</p>
+</div>
+
+<!-- Scripts -->
+<script src="https://code.jquery.com/jquery-3.5.1.slim.min.js"></script>
+<script src="https://cdn.jsdelivr.net/npm/bootstrap@4.5.2/dist/js/bootstrap.bundle.min.js"></script>
+
+</body>
+</html>
