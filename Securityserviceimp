@@ -1,0 +1,51 @@
+import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.security.authentication.AuthenticationManager;
+import org.springframework.security.authentication.AnonymousAuthenticationToken;
+import org.springframework.security.core.Authentication;
+import org.springframework.security.core.context.SecurityContextHolder;
+import org.springframework.security.core.userdetails.UserDetailsService;
+import org.springframework.stereotype.Service;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
+
+@Service
+public class SecurityServiceImpl implements SecurityService {
+
+    @Autowired
+    private AuthenticationManager authenticationManager;
+
+    @Autowired
+    private UserDetailsService userDetailsService;
+
+    private static final Logger logger = LoggerFactory.getLogger(SecurityServiceImpl.class);
+
+    @Override
+    public boolean isAuthenticated() {
+        Authentication authentication = SecurityContextHolder.getContext().getAuthentication();
+        
+        if (authentication == null || AnonymousAuthenticationToken.class.isAssignableFrom(authentication.getClass())) {
+            logger.debug("Authentication is either null or anonymous.");
+            return false;
+        }
+
+        logger.debug("User '{}' is authenticated: {}", authentication.getName(), authentication.isAuthenticated());
+        return authentication.isAuthenticated();
+    }
+
+    // Optional: Uncomment and implement if needed
+    /*
+    @Override
+    public void autoLogin(String username, String password) {
+        UserDetails userDetails = userDetailsService.loadUserByUsername(username);
+        UsernamePasswordAuthenticationToken authenticationToken =
+            new UsernamePasswordAuthenticationToken(userDetails, password, userDetails.getAuthorities());
+
+        authenticationManager.authenticate(authenticationToken);
+
+        if (authenticationToken.isAuthenticated()) {
+            SecurityContextHolder.getContext().setAuthentication(authenticationToken);
+            logger.debug(String.format("Auto login successful for user: %s", username));
+        }
+    }
+    */
+}
