@@ -1,0 +1,29 @@
+<div class="nav">
+  <!-- Navbar -->
+  <nav style="background-color: #0c2d62; padding: 10px 20px; display: flex; align-items: center; justify-content: space-between;">
+    
+    <!-- Left: Bank Dashboard -->
+    <div style="flex: 1; text-align: left;">
+      <a class="navbar-brand dashboard-title" href="#" style="color: white; font-weight: bold; text-decoration: none;">
+        <i class="fas fa-university mr-2"></i>
+        <span>Bank Dashboard</span>
+      </a>
+    </div>
+
+    <!-- Center: Welcome -->
+    <div style="flex: 1; text-align: center;">
+      <span style="color: white; font-weight: bold;">Welcome, <span sec:authentication="name"></span></span>
+    </div>
+
+    <!-- Right: Logout -->
+    <div style="flex: 1; text-align: right;">
+      <a href="#" onclick="document.getElementById('logoutForm').submit()" 
+         class="btn btn-outline-danger btn-sm" style="color: white; font-weight: bold; text-decoration: none;">
+        <i class="fas fa-sign-out-alt ml-1"></i> Logout
+      </a>
+      <form id="logoutForm" method="POST" th:action="@{/logout}" style="display: none;">
+        <input type="hidden" name="${_csrf.parameterName}" value="${_csrf.token}" />
+      </form>
+    </div>
+  </nav>
+</div>
