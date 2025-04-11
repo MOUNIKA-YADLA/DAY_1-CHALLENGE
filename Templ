@@ -1,0 +1,188 @@
+<!DOCTYPE html>
+<html lang="en" xmlns:th="http://www.thymeleaf.org" xmlns:sec="https://www.thymeleaf.org/thymeleaf-extras-springsecurity5">
+<head>
+  <meta charset="UTF-8">
+  <title>Dashboard - Bank Account Management</title>
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <link href="https://stackpath.bootstrapcdn.com/bootstrap/4.5.2/css/bootstrap.min.css" rel="stylesheet">
+  <link href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.0/css/all.min.css" rel="stylesheet">
+  <style>
+    body {
+      background: linear-gradient(135deg, #0f2027, #203a43, #2c5364);
+      font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+      color: white;
+    }
+
+    .dashboard-container {
+      background-color: rgba(255, 255, 255, 0.98);
+      border-radius: 12px;
+      padding: 40px;
+      margin-top: 40px;
+      box-shadow: 0 10px 30px rgba(0, 0, 0, 0.3);
+      color: #333;
+    }
+
+    .dashboard-title {
+      font-size: 2rem;
+      font-weight: 700;
+      margin-bottom: 20px;
+      text-align: center;
+    }
+
+    .dashboard-subtitle {
+      text-align: center;
+      font-size: 1.1rem;
+      color: #555;
+      margin-bottom: 35px;
+    }
+
+    .dashboard-card {
+      background-color: #ffffff;
+      border-radius: 10px;
+      box-shadow: 0 4px 18px rgba(0, 0, 0, 0.15);
+      padding: 25px;
+      text-align: center;
+      transition: all 0.3s ease;
+      height: 100%;
+    }
+
+    .dashboard-card:hover {
+      transform: translateY(-5px);
+      box-shadow: 0 8px 25px rgba(0, 0, 0, 0.25);
+    }
+
+    .dashboard-card h4 {
+      font-weight: 600;
+      margin-top: 15px;
+      margin-bottom: 10px;
+      color: #1e3c72;
+    }
+
+    .dashboard-card p {
+      font-size: 0.95rem;
+      color: #666;
+    }
+
+    .dashboard-card i {
+      font-size: 2rem;
+      color: #2a5298;
+    }
+
+    .btn-custom {
+      margin-top: 15px;
+      width: 100%;
+      font-weight: 600;
+    }
+
+    .logout-link {
+      float: right;
+      color: #dc3545;
+      font-weight: bold;
+      text-decoration: none;
+    }
+
+    .logout-link:hover {
+      text-decoration: underline;
+      color: #a10000;
+    }
+
+    @media (max-width: 768px) {
+      .logout-link {
+        float: none;
+        display: block;
+        text-align: center;
+        margin-top: 15px;
+      }
+    }
+  </style>
+</head>
+<body>
+  <div class="container">
+    <!-- Logout Section -->
+    <div class="mt-4" sec:authorize="isAuthenticated()">
+      <form id="logoutForm" method="POST" th:action="@{/logout}">
+        <input type="hidden" name="${_csrf.parameterName}" value="${_csrf.token}" />
+        <h2>
+          Welcome <span sec:authentication="name"></span>
+          <a href="#" class="logout-link" onclick="document.forms['logoutForm'].submit()">Logout</a>
+        </h2>
+      </form>
+    </div>
+
+    <!-- Dashboard Container -->
+    <div class="dashboard-container">
+      <div class="dashboard-title">Bank Account Management Dashboard</div>
+      <div class="dashboard-subtitle">A complete portal to manage, monitor, and report your accounts</div>
+
+      <div class="row">
+        <div class="col-md-4 mb-4">
+          <div class="dashboard-card">
+            <i class="fas fa-file-upload"></i>
+            <h4>Upload Excel</h4>
+            <p>Upload bulk bank account data via Excel sheet.</p>
+            <a href="/upload-excel" class="btn btn-primary btn-custom">Upload Now</a>
+          </div>
+        </div>
+
+        <div class="col-md-4 mb-4">
+          <div class="dashboard-card">
+            <i class="fas fa-database"></i>
+            <h4>View Accounts</h4>
+            <p>Check, filter, and manage account details easily.</p>
+            <a href="/accounts" class="btn btn-success btn-custom">View Accounts</a>
+          </div>
+        </div>
+
+        <div class="col-md-4 mb-4">
+          <div class="dashboard-card">
+            <i class="fas fa-download"></i>
+            <h4>Download Reports</h4>
+            <p>Export your data into Excel, CSV, or PDF formats.</p>
+            <a href="/reports" class="btn btn-info btn-custom">Download</a>
+          </div>
+        </div>
+      </div>
+
+      <div class="row">
+        <div class="col-md-6 mb-4">
+          <div class="dashboard-card">
+            <i class="fas fa-user-plus"></i>
+            <h4>Add New Account</h4>
+            <p>Create a new bank account entry in the system.</p>
+            <a href="/accounts/add" class="btn btn-warning btn-custom">Add Account</a>
+          </div>
+        </div>
+
+        <div class="col-md-6 mb-4">
+          <div class="dashboard-card">
+            <i class="fas fa-history"></i>
+            <h4>View Transactions</h4>
+            <p>Track account transactions and activity history.</p>
+            <a href="/history" class="btn btn-secondary btn-custom">View Transactions</a>
+          </div>
+        </div>
+      </div>
+
+      <div class="row">
+        <div class="col-md-6 mb-4">
+          <div class="dashboard-card">
+            <i class="fas fa-headset"></i>
+            <h4>Contact Support</h4>
+            <p>Need assistance? Our team is here to help.</p>
+            <a href="/contact" class="btn btn-primary btn-custom">Contact Us</a>
+          </div>
+        </div>
+
+        <div class="col-md-6 mb-4">
+          <div class="dashboard-card">
+            <i class="fas fa-question-circle"></i>
+            <h4>FAQ</h4>
+            <p>Find quick answers to commonly asked questions.</p>
+            <a href="/faq" class="btn btn-info btn-custom">Visit FAQ</a>
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
+</body>
+</html>
