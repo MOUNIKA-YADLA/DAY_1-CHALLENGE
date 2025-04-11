@@ -1,0 +1,85 @@
+package com.example.demo.controller;
+
+import com.example.demo.model.User;
+import com.example.demo.service.SecurityService;
+import com.example.demo.service.UserService;
+import com.example.demo.validator.UserValidator;
+
+import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.stereotype.Controller;
+import org.springframework.ui.Model;
+import org.springframework.validation.BindingResult;
+import org.springframework.web.bind.annotation.*;
+import org.springframework.web.servlet.mvc.support.RedirectAttributes;
+
+@Controller
+public class UserController {
+
+    @Autowired
+    private UserService userService;
+
+    @Autowired
+    private SecurityService securityService;
+
+    @Autowired
+    private UserValidator userValidator;
+
+    // Show registration form
+    @GetMapping("/registration")
+    public String registration(Model model) {
+        if (securityService.isAuthenticated()) {
+            return "redirect:/";
+        }
+
+        model.addAttribute("userForm", new User());
+        return "registration";
+    }
+
+    // Handle registration form submit
+    @PostMapping("/registration")
+    public String registration(@ModelAttribute("userForm") User userForm,
+                               BindingResult bindingResult,
+                               RedirectAttributes redirectAttributes) {
+        userValidator.validate(userForm, bindingResult);
+
+        if (bindingResult.hasErrors()) {
+            return "registration";
+        }
+
+        userService.save(userForm);
+
+        // Optional: auto login after registration
+        securityService.autoLogin(userForm.getUsername(), userForm.getPasswordConfirm());
+
+        // Redirect to homepage after auto login
+        return "redirect:/";
+    }
+
+    // Show login form
+    @GetMapping("/login")
+    public String login(Model model,
+                        @RequestParam(value = "error", required = false) String error,
+                        @RequestParam(value = "logout", required = false) String logout,
+                        @RequestParam(value = "registered", required = false) String registered) {
+        if (securityService.isAuthenticated()) {
+            return "redirect:/";
+        }
+
+        if (error != null)
+            model.addAttribute("error", "Your username and password is invalid.");
+
+        if (logout != null)
+            model.addAttribute("message", "You have been logged out successfully.");
+
+        if (registered != null)
+            model.addAttribute("message", "Registration successful! Please login.");
+
+        return "login";
+    }
+
+    // Home or welcome page
+    @GetMapping({"/", "/welcome"})
+    public String welcome(Model model) {
+        return "welcome";
+    }
+}
