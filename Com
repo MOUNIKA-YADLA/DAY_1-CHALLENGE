@@ -1,4 +1,29 @@
-<!DOCTYPE html>
+<!-- Navbar -->
+<nav class="navbar navbar-expand-lg navbar-light bg-light shadow-sm">
+  <div class="container">
+    <a class="navbar-brand font-weight-bold text-primary" href="#">
+      <i class="fas fa-university mr-2"></i>Bank Dashboard
+    </a>
+    <div class="ml-auto d-flex align-items-center">
+      <span class="mr-3 font-weight-bold text-dark">
+        Welcome, <span sec:authentication="name"></span>
+      </span>
+      <a href="#" onclick="document.getElementById('logoutForm').submit()" class="btn btn-outline-danger btn-sm">
+        Logout <i class="fas fa-sign-out-alt ml-1"></i>
+      </a>
+      <form id="logoutForm" method="POST" th:action="@{/logout}" style="display: none;">
+        <input type="hidden" name="${_csrf.parameterName}" value="${_csrf.token}" />
+      </form>
+    </div>
+  </div>
+</nav>
+
+
+
+
+
+
+!DOCTYPE html>
 <html lang="en" xmlns:th="http://www.thymeleaf.org" xmlns:sec="https://www.thymeleaf.org/thymeleaf-extras-springsecurity5">
 <head>
     <meta charset="UTF-8">
