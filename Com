@@ -1,0 +1,295 @@
+<!DOCTYPE html>
+<html lang="en" xmlns:th="http://www.thymeleaf.org" xmlns:sec="https://www.thymeleaf.org/thymeleaf-extras-springsecurity5">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>BankFlow | Account Dashboard</title>
+    <link rel="stylesheet" href="https://stackpath.bootstrapcdn.com/bootstrap/4.5.2/css/bootstrap.min.css">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css">
+    <link href="https://fonts.googleapis.com/css2?family=Poppins:wght@400;500;600;700&display=swap" rel="stylesheet">
+    <style>
+        :root {
+            --primary: #4361ee;
+            --secondary: #3a0ca3;
+            --accent: #4cc9f0;
+            --light: #f8f9ff;
+            --white: #ffffff;
+            --success: #38b000;
+            --warning: #ff9e00;
+            --danger: #ef233c;
+            --shadow: 0 10px 30px rgba(0, 0, 0, 0.08);
+        }
+        
+        body {
+            background: linear-gradient(135deg, #f5f7ff 0%, #e6ecff 100%);
+            font-family: 'Poppins', sans-serif;
+            min-height: 100vh;
+        }
+        
+        .dashboard-header {
+            background: linear-gradient(90deg, var(--primary) 0%, var(--secondary) 100%);
+            color: white;
+            padding: 15px 0;
+            box-shadow: var(--shadow);
+            margin-bottom: 30px;
+        }
+        
+        .welcome-message {
+            font-weight: 600;
+            font-size: 1.1rem;
+        }
+        
+        .logout-btn {
+            background: white;
+            color: var(--primary);
+            border-radius: 25px;
+            padding: 5px 15px;
+            font-weight: 600;
+            transition: all 0.3s;
+            border: none;
+        }
+        
+        .logout-btn:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 5px 15px rgba(255, 255, 255, 0.2);
+        }
+        
+        .dashboard-container {
+            max-width: 1200px;
+            margin: 0 auto;
+            padding: 0 20px;
+        }
+        
+        .dashboard-title {
+            color: var(--secondary);
+            font-weight: 700;
+            font-size: 2.2rem;
+            margin-bottom: 10px;
+            text-shadow: 1px 1px 3px rgba(0, 0, 0, 0.1);
+        }
+        
+        .dashboard-subtitle {
+            color: #6c757d;
+            font-size: 1.1rem;
+            margin-bottom: 40px;
+        }
+        
+        .feature-card {
+            background: var(--white);
+            border-radius: 12px;
+            box-shadow: var(--shadow);
+            padding: 30px 25px;
+            margin-bottom: 25px;
+            height: 100%;
+            transition: all 0.4s cubic-bezier(0.175, 0.885, 0.32, 1.275);
+            border: none;
+            overflow: hidden;
+            position: relative;
+            z-index: 1;
+        }
+        
+        .feature-card::before {
+            content: '';
+            position: absolute;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 5px;
+            background: linear-gradient(90deg, var(--primary), var(--accent));
+        }
+        
+        .feature-card:hover {
+            transform: translateY(-10px) scale(1.02);
+            box-shadow: 0 15px 40px rgba(0, 0, 0, 0.15);
+        }
+        
+        .feature-icon {
+            font-size: 2.8rem;
+            margin-bottom: 20px;
+            background: linear-gradient(45deg, var(--primary), var(--accent));
+            -webkit-background-clip: text;
+            background-clip: text;
+            color: transparent;
+        }
+        
+        .feature-title {
+            font-weight: 700;
+            margin-bottom: 15px;
+            color: var(--secondary);
+            font-size: 1.3rem;
+        }
+        
+        .feature-description {
+            color: #6c757d;
+            margin-bottom: 25px;
+            font-size: 0.95rem;
+        }
+        
+        .btn-feature {
+            border-radius: 25px;
+            padding: 10px 25px;
+            font-weight: 600;
+            transition: all 0.3s;
+            border: none;
+            background: linear-gradient(90deg, var(--primary), var(--secondary));
+            color: white;
+            box-shadow: 0 4px 15px rgba(67, 97, 238, 0.3);
+            position: relative;
+            overflow: hidden;
+        }
+        
+        .btn-feature:hover {
+            transform: translateY(-3px);
+            box-shadow: 0 8px 20px rgba(67, 97, 238, 0.4);
+            color: white;
+        }
+        
+        .btn-feature:active {
+            transform: translateY(0);
+        }
+        
+        .highlight-card {
+            border: 2px solid rgba(67, 97, 238, 0.2);
+            background: linear-gradient(135deg, rgba(248, 249, 255, 0.9), rgba(230, 236, 255, 0.9));
+        }
+        
+        .section-divider {
+            border-top: 2px dashed rgba(67, 97, 238, 0.2);
+            margin: 50px 0;
+        }
+        
+        @media (max-width: 768px) {
+            .dashboard-title {
+                font-size: 1.8rem;
+            }
+            .feature-card {
+                padding: 25px 20px;
+            }
+        }
+    </style>
+</head>
+<body>
+    <!-- Header -->
+    <header class="dashboard-header">
+        <div class="container">
+            <div class="d-flex justify-content-between align-items-center">
+                <div class="welcome-message">
+                    <i class="fas fa-user-circle mr-2"></i>Welcome, <span sec:authentication="name"></span>
+                </div>
+                <div sec:authorize="isAuthenticated()">
+                    <form id="logoutForm" method="POST" th:action="@{/logout}">
+                        <input type="hidden" name="${_csrf.parameterName}" value="${_csrf.token}" />
+                        <button type="submit" class="logout-btn">
+                            <i class="fas fa-sign-out-alt mr-1"></i> Logout
+                        </button>
+                    </form>
+                </div>
+            </div>
+        </div>
+    </header>
+
+    <!-- Main Content -->
+    <main class="dashboard-container">
+        <div class="text-center mb-5">
+            <h1 class="dashboard-title">
+                <i class="fas fa-university mr-2"></i>BankFlow Dashboard
+            </h1>
+            <p class="dashboard-subtitle">Manage accounts seamlessly with powerful tools</p>
+        </div>
+
+        <!-- Primary Features -->
+        <div class="row">
+            <div class="col-md-4">
+                <div class="feature-card highlight-card">
+                    <div class="feature-icon">
+                        <i class="fas fa-file-upload"></i>
+                    </div>
+                    <h4 class="feature-title">Bulk Upload</h4>
+                    <p class="feature-description">Import multiple accounts instantly via Excel</p>
+                    <a href="/upload-excel" class="btn btn-feature">Upload Now</a>
+                </div>
+            </div>
+            
+            <div class="col-md-4">
+                <div class="feature-card highlight-card">
+                    <div class="feature-icon">
+                        <i class="fas fa-list-ul"></i>
+                    </div>
+                    <h4 class="feature-title">Account Explorer</h4>
+                    <p class="feature-description">View & filter all accounts with ease</p>
+                    <a href="/accounts" class="btn btn-feature">Browse Accounts</a>
+                </div>
+            </div>
+            
+            <div class="col-md-4">
+                <div class="feature-card highlight-card">
+                    <div class="feature-icon">
+                        <i class="fas fa-chart-pie"></i>
+                    </div>
+                    <h4 class="feature-title">Smart Reports</h4>
+                    <p class="feature-description">Generate insights in one click</p>
+                    <a href="/reports" class="btn btn-feature">Get Reports</a>
+                </div>
+            </div>
+        </div>
+
+        <div class="section-divider"></div>
+
+        <!-- Quick Actions -->
+        <div class="row">
+            <div class="col-md-6">
+                <div class="feature-card">
+                    <div class="feature-icon">
+                        <i class="fas fa-plus"></i>
+                    </div>
+                    <h4 class="feature-title">New Account</h4>
+                    <p class="feature-description">Create individual accounts in seconds</p>
+                    <a href="/accounts/add" class="btn btn-feature">Add Account</a>
+                </div>
+            </div>
+            
+            <div class="col-md-6">
+                <div class="feature-card">
+                    <div class="feature-icon">
+                        <i class="fas fa-history"></i>
+                    </div>
+                    <h4 class="feature-title">Transaction Logs</h4>
+                    <p class="feature-description">Full audit trail of all activities</p>
+                    <a href="/history" class="btn btn-feature">View History</a>
+                </div>
+            </div>
+        </div>
+
+        <div class="section-divider"></div>
+
+        <!-- Support Section -->
+        <div class="row">
+            <div class="col-md-6">
+                <div class="feature-card">
+                    <div class="feature-icon">
+                        <i class="fas fa-life-ring"></i>
+                    </div>
+                    <h4 class="feature-title">Live Support</h4>
+                    <p class="feature-description">24/7 assistance from our team</p>
+                    <a href="/contact" class="btn btn-feature">Contact Us</a>
+                </div>
+            </div>
+            
+            <div class="col-md-6">
+                <div class="feature-card">
+                    <div class="feature-icon">
+                        <i class="fas fa-question"></i>
+                    </div>
+                    <h4 class="feature-title">Help Center</h4>
+                    <p class="feature-description">Guides & FAQs for quick answers</p>
+                    <a href="/faq" class="btn btn-feature">Visit Help</a>
+                </div>
+            </div>
+        </div>
+    </main>
+
+    <script src="https://code.jquery.com/jquery-3.5.1.slim.min.js"></script>
+    <script src="https://cdn.jsdelivr.net/npm/popper.js@1.16.1/dist/umd/popper.min.js"></script>
+    <script src="https://stackpath.bootstrapcdn.com/bootstrap/4.5.2/js/bootstrap.min.js"></script>
+</body>
+</html>
