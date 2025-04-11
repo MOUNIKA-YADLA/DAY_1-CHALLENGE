@@ -1,0 +1,67 @@
+package com.bnpp.bb.primeservices.service;
+
+import com.bnpp.bb.primeservices.model.Role;
+import com.bnpp.bb.primeservices.model.User;
+import com.bnpp.bb.primeservices.repository.RoleRepository;
+import com.bnpp.bb.primeservices.repository.UserRepository;
+import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.security.crypto.bcrypt.BCryptPasswordEncoder;
+import org.springframework.stereotype.Service;
+
+import java.util.Collections;
+
+@Service
+public class UserServiceImpl implements UserService {
+
+    @Autowired
+    private UserRepository userRepository;
+
+    @Autowired
+    private RoleRepository roleRepository;
+
+    @Autowired
+    private BCryptPasswordEncoder bCryptPasswordEncoder;
+
+    @Override
+    public void save(User user) {
+        // Encrypt the password
+        user.setPassword(bCryptPasswordEncoder.encode(user.getPassword()));
+
+        // Save the user first to avoid null user_id issue
+        userRepository.save(user);
+
+        // Fetch role
+        Role userRole = roleRepository.findByName("USER")
+                .orElseThrow(() -> new RuntimeException("Role USER not found in DB"));
+
+        // Set role to the user
+        user.setRoles(Collections.singleton(userRole));
+
+        // Save user again with roles
+        userRepository.save(user);
+    }
+
+    @Override
+    public User findByUsername(String username) {
+        return userRepository.findByUsername(username);
+    }
+
+    @Override
+    public void registerUser(User user) {
+        // Encrypt the password
+        user.setPassword(bCryptPasswordEncoder.encode(user.getPassword()));
+
+        // Save the user first to avoid null user_id issue
+        userRepository.save(user);
+
+        // Fetch role
+        Role userRole = roleRepository.findByName("ROLE_USER")
+                .orElseThrow(() -> new RuntimeException("Role ROLE_USER not found in DB"));
+
+        // Set role to the user
+        user.setRoles(Collections.singleton(userRole));
+
+        // Save user again with role
+        userRepository.save(user);
+    }
+}
