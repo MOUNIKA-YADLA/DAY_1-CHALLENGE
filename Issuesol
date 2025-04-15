@@ -1,0 +1,49 @@
+@Service
+@RequiredArgsConstructor
+public class UserDetailsServiceImpl implements UserDetailsService {
+    private final UserRepository userRepository;
+
+    @Override
+    @Transactional(readOnly = true)
+    public UserDetails loadUserByUsername(String username) throws UsernameNotFoundException {
+        User user = userRepository.findByUsernameIgnoreCase(username)
+            .orElseThrow(() -> new UsernameNotFoundException("Invalid username or password"));
+        
+        return User.builder()
+            .username(user.getUsername())
+            .password(user.getPassword())
+            .authorities(user.getRoles().stream()
+                .map(role -> new SimpleGrantedAuthority(role.getName()))
+                .collect(Collectors.toList()))
+            .build();
+    }
+}
+
+
+
+@Service
+@Transactional
+@RequiredArgsConstructor
+public class UserServiceImpl implements UserService {
+    private final UserRepository userRepository;
+    private final RoleRepository roleRepository;
+    private final BCryptPasswordEncoder passwordEncoder;
+
+    @Override
+    public void registerUser(UserRegistrationDto registrationDto) {
+        // Case-insensitive check
+        if (userRepository.existsByUsernameIgnoreCase(registrationDto.getUsername())) {
+            throw new RuntimeException("Username already exists");
+        }
+
+        User user = new User();
+        user.setUsername(registrationDto.getUsername()); // Store exact case
+        user.setPassword(passwordEncoder.encode(registrationDto.getPassword()));
+        
+        Role userRole = roleRepository.findByName("ROLE_USER")
+            .orElseThrow(() -> new RuntimeException("Default role not found"));
+        
+        user.setRoles(Collections.singleton(userRole));
+        userRepository.save(user);
+    }
+}
