@@ -1,99 +1,59 @@
-@Transactional
-public User registerUser(UserRegistrationDto registrationDto) {
-    // 1. Check if username exists
-    if (userRepository.existsByUsername(registrationDto.getUsername())) {
-        throw new RuntimeException("Username already exists");
-    }
-
-    // 2. Create new user
-    User user = new User();
-    user.setUsername(registrationDto.getUsername());
-    user.setPassword(bCryptPasswordEncoder.encode(registrationDto.getPassword()));
-
-    // 3. Save user FIRST to generate ID
-    User savedUser = userRepository.save(user);
-
-    // 4. Get the USER role (or create if doesn't exist)
-    Role userRole = roleRepository.findByName("ROLE_USER")
-        .orElseGet(() -> {
-            Role newRole = new Role("ROLE_USER");
-            return roleRepository.save(newRole);
-        });
-
-    // 5. Add role to user
-    savedUser.getRoles().add(userRole);
-    
-    // 6. Return the saved user (no need to save again)
-    return savedUser;
-}
-
-
-
-
-
-
-import com.bnpp.bb.primeservices.model.Role;
-import com.bnpp.bb.primeservices.model.User;
-import com.bnpp.bb.primeservices.repository.RoleRepository;
-import com.bnpp.bb.primeservices.repository.UserRepository;
-import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.security.crypto.bcrypt.BCryptPasswordEncoder;
-import org.springframework.stereotype.Service;
-
-import java.util.Collections;
-
 @Service
+@Transactional
 public class UserServiceImpl implements UserService {
 
-    @Autowired
-    private UserRepository userRepository;
+    private final UserRepository userRepository;
+    private final RoleRepository roleRepository;
+    private final BCryptPasswordEncoder passwordEncoder;
 
     @Autowired
-    private RoleRepository roleRepository;
-
-    @Autowired
-    private BCryptPasswordEncoder bCryptPasswordEncoder;
+    public UserServiceImpl(UserRepository userRepository, 
+                         RoleRepository roleRepository,
+                         BCryptPasswordEncoder passwordEncoder) {
+        this.userRepository = userRepository;
+        this.roleRepository = roleRepository;
+        this.passwordEncoder = passwordEncoder;
+    }
 
     @Override
-    public void save(User user) {
-        // Encrypt the password
-        user.setPassword(bCryptPasswordEncoder.encode(user.getPassword()));
+    public void registerUser(UserRegistrationDto registrationDto) {
+        // Check if username exists
+        if (userRepository.existsByUsername(registrationDto.getUsername())) {
+            throw new RuntimeException("Username already exists");
+        }
 
-        // Save the user first to avoid null user_id issue
-        userRepository.save(user);
+        // Create and save user
+        User user = new User();
+        user.setUsername(registrationDto.getUsername());
+        user.setPassword(passwordEncoder.encode(registrationDto.getPassword()));
+        User savedUser = userRepository.save(user);
 
-        // Fetch role
-        Role userRole = roleRepository.findByName("USER")
-                .orElseThrow(() -> new RuntimeException("Role USER not found in DB"));
+        // Find or create ROLE_USER
+        Role userRole = findOrCreateUserRole();
+        
+        // Assign role
+        savedUser.getRoles().add(userRole);
+    }
 
-        // Set role to the user
-        user.setRoles(Collections.singleton(userRole));
-
-        // Save user again with roles
-        userRepository.save(user);
+    private Role findOrCreateUserRole() {
+        // Try to find existing role
+        Role userRole = roleRepository.findByName("ROLE_USER");
+        
+        // If not found, create new one
+        if (userRole == null) {
+            userRole = new Role("ROLE_USER");
+            roleRepository.save(userRole);
+        }
+        
+        return userRole;
     }
 
     @Override
     public User findByUsername(String username) {
-        return userRepository.findByUsername(username);
-    }
-
-    @Override
-    public void registerUser(User user) {
-        // Encrypt the password
-        user.setPassword(bCryptPasswordEncoder.encode(user.getPassword()));
-
-        // Save the user first to avoid null user_id issue
-        userRepository.save(user);
-
-        // Fetch role
-        Role userRole = roleRepository.findByName("ROLE_USER")
-                .orElseThrow(() -> new RuntimeException("Role ROLE_USER not found in DB"));
-
-        // Set role to the user
-        user.setRoles(Collections.singleton(userRole));
-
-        // Save user again with role
-        userRepository.save(user);
+        User user = userRepository.findByUsername(username);
+        if (user == null) {
+            throw new UsernameNotFoundException("User not found");
+        }
+        return user;
     }
 }
