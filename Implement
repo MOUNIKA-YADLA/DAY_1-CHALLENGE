@@ -1,0 +1,63 @@
+@Service
+public class UserServiceImpl implements UserService {
+
+    @Autowired
+    private UserRepository userRepository;
+    
+    @Autowired
+    private RoleRepository roleRepository;
+    
+    @Autowired
+    private BCryptPasswordEncoder bCryptPasswordEncoder;
+    
+    @Override
+    public void save(User user) {
+        // Encrypt the password
+        user.setPassword(bCryptPasswordEncoder.encode(user.getPassword()));
+        
+        // First, save and flush to generate the user ID
+        userRepository.saveAndFlush(user);
+        
+        // Fetch the role
+        Role userRole = roleRepository.findByName("USER");
+        if (userRole == null) {
+            throw new RuntimeException("Role USER not found in DB");
+        }
+        
+        // Assign a mutable collection of roles to the user
+        Set<Role> roles = new HashSet<>();
+        roles.add(userRole);
+        user.setRoles(roles);
+        
+        // Save again now that the user has an ID
+        userRepository.save(user);
+    }
+    
+    @Override
+    public User findByUsername(String username) {
+        return userRepository.findByUsername(username);
+    }
+    
+    @Override
+    public void registerUser(User user) {
+        // Encrypt the password
+        user.setPassword(bCryptPasswordEncoder.encode(user.getPassword()));
+        
+        // First, save and flush the user to ensure ID generation
+        userRepository.saveAndFlush(user);
+        
+        // Fetch the role
+        Role userRole = roleRepository.findByName("ROLE_USER");
+        if (userRole == null) {
+            throw new RuntimeException("Role USER not found in DB");
+        }
+        
+        // Assign a mutable collection of roles to the user
+        Set<Role> roles = new HashSet<>();
+        roles.add(userRole);
+        user.setRoles(roles);
+        
+        // Save the user again with roles assigned
+        userRepository.save(user);
+    }
+}
