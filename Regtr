@@ -1,0 +1,22 @@
+    @Override
+    @Transactional
+    public void registerUser(User user) {
+        // Validate password confirmation
+        if (!user.getPassword().equals(user.getPasswordConfirm())) {
+            throw new IllegalArgumentException("Passwords do not match");
+        }
+        
+        // Encode password
+        user.setPassword(bCryptPasswordEncoder.encode(user.getPassword()));
+        
+        // Find or create default role
+        Role userRole = roleRepository.findByName("ROLE_USER")
+            .orElseGet(() -> roleRepository.save(new Role("ROLE_USER")));
+        
+        // Assign role
+        user.setRoles(Collections.singleton(userRole));
+        
+        // Save user
+        userRepository.save(user);
+    }
+}
