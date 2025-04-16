@@ -1,0 +1,53 @@
+@Controller
+public class UserController {
+
+    @Autowired
+    private UserService userService;
+    
+    @Autowired
+
+    private SecurityService securityService;
+    
+    @Autowired
+    private UserValidator userValidator;
+
+    @GetMapping("/registration")
+    public String registration(Model model) {
+        if (securityService.isAuthenticated()) {
+            return "redirect:/";
+        }
+        model.addAttribute("userForm", new User());
+        return "registration";
+    }
+
+    @PostMapping("/registration")
+    public String registration(
+            @ModelAttribute("userForm") User userForm,
+            BindingResult bindingResult,
+            RedirectAttributes redirectAttributes) {
+        
+        // Validate user input
+        userValidator.validate(userForm, bindingResult);
+
+        // Return to form if errors exist
+        if (bindingResult.hasErrors()) {
+            return "registration";
+        }
+        
+        try {
+            // Save user
+            userService.save(userForm);
+            
+            // Add success message and redirect to login
+            redirectAttributes.addFlashAttribute("successMessage", 
+                "Registration successful! Please login.");
+            return "redirect:/login";
+            
+        } catch (Exception e) {
+            // Handle any exceptions (like duplicate username)
+            bindingResult.reject("registrationError", 
+                "Registration failed: " + e.getMessage());
+            return "registration";
+        }
+    }
+}
