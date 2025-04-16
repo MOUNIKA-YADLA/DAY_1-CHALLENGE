@@ -1,0 +1,73 @@
+import com.bmpb.bio.primeservices.model.User;
+import com.bmpb.bio.primeservices.service.UserService;
+import com.bmpb.bio.primeservices.service.SecurityService;
+import com.bmpb.bio.primeservices.validator.UserValidator;
+import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.stereotype.Controller;
+import org.springframework.ui.Model;
+import org.springframework.validation.BindingResult;
+import org.springframework.web.bind.annotation.GetMapping;
+import org.springframework.web.bind.annotation.ModelAttribute;
+import org.springframework.web.bind.annotation.PostMapping;
+import org.springframework.web.servlet.mvc.support.RedirectAttributes;
+
+@Controller
+public class UserController {
+
+    @Autowired
+    private UserService userService;
+    
+    @Autowired
+    private SecurityService securityService;
+    
+    @Autowired
+    private UserValidator userValidator;
+
+    @GetMapping("/registration")
+    public String registration(Model model) {
+        if (securityService.isAuthenticated()) {
+            return "redirect:/";
+        }
+        model.addAttribute("userForm", new User());
+        return "registration";
+    }
+
+    @PostMapping("/registration")
+    public String registration(
+            @ModelAttribute("userForm") User userForm,
+            BindingResult bindingResult,
+            RedirectAttributes redirectAttributes) {
+        
+        userValidator.validate(userForm, bindingResult);
+
+        if (bindingResult.hasErrors()) {
+            return "registration";
+        }
+        
+        userService.save(userForm);
+        redirectAttributes.addFlashAttribute("successMessage", "Registration successful! Please login.");
+        return "redirect:/login";
+    }
+
+    @GetMapping("/login")
+    public String login(Model model, String error, String logout) {
+        if (securityService.isAuthenticated()) {
+            return "redirect:/";
+        }
+        
+        if (error != null) {
+            model.addAttribute("error", "Your username and password is invalid.");
+        }
+        
+        if (logout != null) {
+            model.addAttribute("message", "You have been logged out successfully.");
+        }
+        
+        return "login";
+    }
+
+    @GetMapping({"/", "/welcome"})
+    public String welcome(Model model) {
+        return "welcome";
+    }
+}
