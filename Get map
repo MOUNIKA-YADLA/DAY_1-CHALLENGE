@@ -1,0 +1,38 @@
+@PostMapping("/registration")
+public String registration(
+        @ModelAttribute("userForm") User userForm,
+        BindingResult bindingResult,
+        RedirectAttributes redirectAttributes) {
+    
+    // Validate user input
+    userValidator.validate(userForm, bindingResult);
+
+    // DEBUG: Check for validation errors
+    System.out.println("Has errors: " + bindingResult.hasErrors());
+    if (bindingResult.hasErrors()) {
+        System.out.println("Validation errors: " + bindingResult.getAllErrors());
+        return "registration";
+    }
+    
+    try {
+        // Save user
+        userService.save(userForm);
+        
+        // DEBUG: Confirm reaching redirect point
+        System.out.println("Redirecting to login...");
+        
+        // Add success message and redirect
+        redirectAttributes.addFlashAttribute("message", 
+            "Registered successfully, please login.");
+        return "redirect:/login";
+        
+    } catch (Exception e) {
+        // DEBUG: Log any exceptions
+        System.out.println("Registration failed: " + e.getMessage());
+        e.printStackTrace();
+        
+        bindingResult.reject("registrationError",
+            "Registration failed: " + e.getMessage());
+        return "registration";
+    }
+}
