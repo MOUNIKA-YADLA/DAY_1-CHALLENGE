@@ -1,0 +1,10 @@
+<script th:inline="javascript">
+/*<![CDATA[*/
+    window.onload = function() {
+        if ([[${success}]] === true) {
+            alert("Registered successfully, please login.");
+            window.location.href = "/login"; // Optional redirect
+        }
+    };
+/*]]>*/
+</script>
