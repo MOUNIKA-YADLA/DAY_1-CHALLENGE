@@ -1,4 +1,65 @@
-<!DOCTYPE html>
+package com.bnpp.bb.primeservices.model;
+
+import java.util.List;
+
+public class BankAccountUploadResponse {
+    private List<BankAccountUploadResult> results;
+    private String originalFilename;
+    private String processedFilename;
+    private String inputFileReference;
+    private String outputFileReference;
+
+    // Constructor
+    public BankAccountUploadResponse(List<BankAccountUploadResult> results, 
+                                   String originalFilename, 
+                                   String processedFilename) {
+        this.results = results;
+        this.originalFilename = originalFilename;
+        this.processedFilename = processedFilename;
+    }
+
+    // Getters and Setters
+    public List<BankAccountUploadResult> getResults() {
+        return results;
+    }
+
+    public void setResults(List<BankAccountUploadResult> results) {
+        this.results = results;
+    }
+
+    public String getOriginalFilename() {
+        return originalFilename;
+    }
+
+    public void setOriginalFilename(String originalFilename) {
+        this.originalFilename = originalFilename;
+    }
+
+    public String getProcessedFilename() {
+        return processedFilename;
+    }
+
+    public void setProcessedFilename(String processedFilename) {
+        this.processedFilename = processedFilename;
+    }
+
+    public String getInputFileReference() {
+        return inputFileReference;
+    }
+
+    public void setInputFileReference(String inputFileReference) {
+        this.inputFileReference = inputFileReference;
+    }
+
+    public String getOutputFileReference() {
+        return outputFileReference;
+    }
+
+    public void setOutputFileReference(String outputFileReference) {
+        this.outputFileReference = outputFileReference;
+    }
+}
+!DOCTYPE html>
 <html xmlns:th="http://www.thymeleaf.org">
 <head>
     <meta charset="UTF-8">
