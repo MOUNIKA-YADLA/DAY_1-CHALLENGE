@@ -1,4 +1,196 @@
-package com.bnpp.bb.primeservices.model;
+package com.bnpp.bb.primeservices.service;
+
+import com.bnpp.bb.primeservices.model.*;
+import com.bnpp.bb.primeservices.repository.*;
+import org.apache.poi.ss.usermodel.*;
+import org.apache.poi.xssf.usermodel.XSSFWorkbook;
+import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.beans.factory.annotation.Value;
+import org.springframework.stereotype.Service;
+import org.springframework.web.multipart.MultipartFile;
+
+import java.io.ByteArrayOutputStream;
+import java.io.IOException;
+import java.math.BigDecimal;
+import java.nio.file.*;
+import java.time.LocalDateTime;
+import java.util.*;
+
+@Service
+public class BankAccountExcelService {
+
+    @Autowired
+    private BankAccountRepository repository;
+    
+    @Autowired
+    private UploadRecordRepository uploadRecordRepository;
+    
+    @Value("${file.upload.dir}")
+    private String uploadDir;
+
+    public BankAccountUploadResponse processExcelFile(MultipartFile file, String username) throws IOException {
+        // Validate input
+        if (file == null || file.isEmpty()) {
+            throw new IllegalArgumentException("Uploaded file cannot be empty");
+        }
+
+        List<BankAccountUploadResult> results = new ArrayList<>();
+        String originalFilename = file.getOriginalFilename();
+        String processedFilename = "results_" + System.currentTimeMillis() + ".xlsx";
+        
+        // Create upload record
+        UploadRecord record = new UploadRecord();
+        record.setOriginalFilename(originalFilename);
+        record.setProcessedFilename(processedFilename);
+        record.setUploadDate(LocalDateTime.now());
+        record.setUploadedBy(username);
+        record.setStatus("PROCESSING");
+        
+        try {
+            // Store original file
+            String filePath = storeFile(file, originalFilename);
+            record.setInputFilePath(filePath);
+            uploadRecordRepository.save(record);
+            
+            // Process Excel
+            Workbook workbook = WorkbookFactory.create(file.getInputStream());
+            Sheet sheet = workbook.getSheetAt(0);
+            
+            // Validate sheet
+            if (sheet == null || sheet.getPhysicalNumberOfRows() <= 1) {
+                throw new IllegalArgumentException("Excel file must contain data with header row");
+            }
+
+            Iterator<Row> rows = sheet.iterator();
+            if (rows.hasNext()) rows.next(); // Skip header
+            
+            while (rows.hasNext()) {
+                BankAccountUploadResult result = new BankAccountUploadResult();
+                try {
+                    Row row = rows.next();
+                    BankAccount account = new BankAccount();
+                    
+                    // Process cells with null checks
+                    account.setAccountId(getStringValue(row.getCell(0)));
+                    account.setAccountName(getStringValue(row.getCell(1)));
+                    account.setAccountType(getStringValue(row.getCell(2)));
+                    account.setBalance(getNumericValue(row.getCell(3)));
+                    account.setBranchCode(getStringValue(row.getCell(4)));
+                    
+                    validateAccount(account);
+                    repository.save(account);
+                    
+                    result.setSuccess(true);
+                    result.setMessage("Account created successfully");
+                    result.setAccount(account);
+                } catch (Exception e) {
+                    result.setSuccess(false);
+                    result.setMessage(e.getMessage());
+                }
+                results.add(result);
+            }
+            
+            // Generate result file
+            byte[] resultFile = generateResultFile(results);
+            String resultPath = storeResultFile(resultFile, processedFilename);
+            record.setOutputFilePath(resultPath);
+            record.setStatus("COMPLETED");
+            
+            BankAccountUploadResponse response = new BankAccountUploadResponse(
+                results, 
+                originalFilename, 
+                processedFilename
+            );
+            response.setInputFileReference(filePath);
+            response.setOutputFileReference(resultPath);
+            
+            return response;
+            
+        } catch (Exception e) {
+            record.setStatus("FAILED");
+            record.setErrorMessage(e.getMessage());
+            uploadRecordRepository.save(record);
+            throw e;
+        }
+    }
+
+    private String storeFile(MultipartFile file, String filename) throws IOException {
+        Path uploadPath = Paths.get(uploadDir);
+        if (!Files.exists(uploadPath)) {
+            Files.createDirectories(uploadPath);
+        }
+        
+        Path filePath = uploadPath.resolve(filename);
+        Files.copy(file.getInputStream(), filePath, StandardCopyOption.REPLACE_EXISTING);
+        return filePath.toString();
+    }
+
+    private String storeResultFile(byte[] content, String filename) throws IOException {
+        Path filePath = Paths.get(uploadDir, filename);
+        Files.write(filePath, content);
+        return filePath.toString();
+    }
+
+    private byte[] generateResultFile(List<BankAccountUploadResult> results) throws IOException {
+        try (Workbook workbook = new XSSFWorkbook(); 
+             ByteArrayOutputStream out = new ByteArrayOutputStream()) {
+            
+            Sheet sheet = workbook.createSheet("Results");
+            
+            // Create header
+            Row header = sheet.createRow(0);
+            header.createCell(0).setCellValue("Account ID");
+            header.createCell(1).setCellValue("Account Name");
+            header.createCell(2).setCellValue("Status");
+            header.createCell(3).setCellValue("Message");
+            
+            // Fill data
+            int rowNum = 1;
+            for (BankAccountUploadResult result : results) {
+                Row row = sheet.createRow(rowNum++);
+                row.createCell(0).setCellValue(result.getAccount().getAccountId());
+                row.createCell(1).setCellValue(result.getAccount().getAccountName());
+                row.createCell(2).setCellValue(result.isSuccess() ? "SUCCESS" : "FAILED");
+                row.createCell(3).setCellValue(result.getMessage());
+            }
+            
+            workbook.write(out);
+            return out.toByteArray();
+        }
+    }
+
+    private void validateAccount(BankAccount account) {
+        if (account.getAccountId() == null || account.getAccountId().trim().isEmpty()) {
+            throw new IllegalArgumentException("Account ID is required");
+        }
+        if (account.getAccountId().length() > 8) {
+            throw new IllegalArgumentException("Account ID must be ≤8 characters");
+        }
+        if (repository.existsByAccountId(account.getAccountId())) {
+            throw new IllegalArgumentException("Account ID already exists");
+        }
+        if (account.getBalance().compareTo(BigDecimal.ZERO) < 0) {
+            throw new IllegalArgumentException("Balance must be positive");
+        }
+    }
+
+    private String getStringValue(Cell cell) {
+        if (cell == null) return null;
+        return cell.toString().trim();
+    }
+
+    private BigDecimal getNumericValue(Cell cell) {
+        if (cell == null) return BigDecimal.ZERO;
+        try {
+            return BigDecimal.valueOf(cell.getNumericCellValue());
+        } catch (IllegalStateException e) {
+            return new BigDecimal(cell.toString());
+        }
+    }
+}
+
+
+com.bnpp.bb.primeservices.model;
 
 import java.util.List;
 
