@@ -1,0 +1,275 @@
+<!DOCTYPE html>
+<html lang="en" xmlns:th="http://www.thymeleaf.org">
+<head>
+    <meta charset="UTF-8">
+    <title>Upload History | Bank Account Manager</title>
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css" rel="stylesheet">
+    <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.10.0/font/bootstrap-icons.css">
+    <style>
+        body {
+            background: linear-gradient(135deg, #13c72, #2a5298); 
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+            color:white; 
+            text-align: center; 
+            font-size: 1.9rem;
+        }
+        :root {
+            --success-color: #28a745;
+            --fail-color: #dc3545;
+        }
+        .history-card {
+            border-radius: 10px;
+            box-shadow: 0 4px 6px rgba(0,0,0,0.1); 
+            transition: transform 0.2s;
+        }
+        .history-card:hover {
+            transform: translateY(-3px);
+        }
+        .success-badge {
+            background-color: var(--success-color);
+        }
+        .fail-badge {
+            background-color: var(--fail-color);
+        }
+        .file-icon i {
+            font-size: 1.5rem; 
+            color: #6c757d;
+        }
+        .btn.btn-primary {
+            background-color:white; 
+            color:#1e3c72; 
+            border: 2px solid #1e3c72; 
+            padding:0.3rem 0.8rem; 
+            font-size:bold;
+        }
+        .download-btn {
+            background-color: #17a2b8;
+            color: white;
+            border: none;
+            padding: 0.25rem 0.5rem;
+            border-radius: 4px;
+        }
+        .download-btn:hover {
+            background-color: #138496;
+        }
+    </style>
+</head>
+<body>
+    <button onclick="window.location.href='/welcome'" class="btn btn-primary">Return to Dashboard</button>
+    
+    <!-- Stats Cards -->
+    <div class="row mb-4">
+        <div class="col-md-4">
+            <div class="card text-white bg-success mb-3">
+                <div class="card-body">
+                    <h5 class="card-title">Successful Records</h5> 
+                    <h2 id="totalSuccess" class="card-text">0</h2>
+                </div>
+            </div>
+        </div>
+        <div class="col-md-4">
+            <div class="card text-white bg-danger mb-3">
+                <div class="card-body">
+                    <h5 class="card-title">Failed Records</h5> 
+                    <h2 id="totalFail" class="card-text">0</h2>
+                </div>
+            </div>
+        </div>
+        <div class="col-md-4">
+            <div class="card text-white bg-primary mb-3">
+                <div class="card-body">
+                    <h5 class="card-title">Total Uploads</h5>
+                    <h2 id="totalUploads" class="card-text">0</h2>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- History Table -->
+    <div class="card history-card">
+        <div class="card-header bg-white">
+            <div class="input-group mb-3" style="max-width: 300px;">
+                <span class="input-group-text"><i class="bi bi-search"></i></span>
+                <input type="text" id="searchInput" class="form-control" placeholder="Search...">
+            </div>
+        </div>
+        <div class="card-body">
+            <div class="table-responsive">
+                <table class="table table-hover align-middle">
+                    <thead>
+                        <tr>
+                            <th>File</th>
+                            <th>Uploaded By</th>
+                            <th>Date & Time</th>
+                            <th class="text-end">Status</th>
+                            <th>Actions</th>
+                        </tr>
+                    </thead>
+                    <tbody id="historyTable">
+                        <!-- Data will be inserted here -->
+                    </tbody>
+                </table>
+            </div>
+        </div>
+    </div>
+
+    <script>
+        document.addEventListener('DOMContentLoaded', () => {
+            fetch('/api/history')
+                .then(res => res.json())
+                .then(data => {
+                    // Update stats cards
+                    const totalSuccess = data.reduce((sum, record) => sum + record.successCount, 0);
+                    const totalFail = data.reduce((sum, record) => sum + record.failureCount, 0);
+                    document.getElementById('totalSuccess').textContent = totalSuccess;
+                    document.getElementById('totalFail').textContent = totalFail;
+                    document.getElementById('totalUploads').textContent = data.length;
+
+                    // Populate table
+                    const table = document.getElementById('historyTable');
+                    data.forEach(record => {
+                        const row = table.insertRow();
+                        row.innerHTML = `
+                            <td>
+                                <i class="bi bi-file-excel file-icon"></i>
+                                ${record.filename}
+                            </td>
+                            <td>
+                                <span class="badge bg-secondary">
+                                    <i class="bi bi-person-fill"></i> ${record.username}
+                                </span>
+                            </td>
+                            <td>
+                                ${new Date(record.uploadTime).toLocaleString()}
+                            </td>
+                            <td class="text-end">
+                                <span class="badge success-badge">
+                                    <i class="bi bi-check-circle"></i> ${record.successCount}
+                                </span>
+                                <span class="badge fail-badge ms-2">
+                                    <i class="bi bi-x-circle"></i> ${record.failureCount}
+                                </span>
+                            </td>
+                            <td>
+                                <button class="download-btn" onclick="downloadFile('${record.filename}')">
+                                    <i class="bi bi-download"></i> Download
+                                </button>
+                            </td>
+                        `;
+                    });
+
+                    // Add search functionality
+                    document.getElementById('searchInput').addEventListener('input', (e) => {
+                        const searchTerm = e.target.value.toLowerCase();
+                        const rows = table.getElementsByTagName('tr');
+                        Array.from(rows).forEach(row => {
+                            const text = row.textContent.toLowerCase();
+                            row.style.display = text.includes(searchTerm) ? '' : 'none';
+                        });
+                    });
+                });
+        });
+
+        function downloadFile(filename) {
+            // Create a temporary link element
+            const link = document.createElement('a');
+            link.href = `/api/download/${encodeURIComponent(filename)}`;
+            link.download = filename;
+            link.target = '_blank';
+            
+            // Trigger the download
+            document.body.appendChild(link);
+            link.click();
+            document.body.removeChild(link);
+        }
+    </script>
+</body>
+</html>
+
+
+
+
+
+package com.bnpp.bb.primeservices.service;
+
+import com.bnpp.bb.primeservices.model.UploadRecord;
+import com.bnpp.bb.primeservices.repository.UploadRecordRepository;
+import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.core.io.Resource;
+import org.springframework.core.io.UrlResource;
+import org.springframework.stereotype.Service;
+
+import java.io.IOException;
+import java.net.MalformedURLException;
+import java.nio.file.Files;
+import java.nio.file.Path;
+import java.nio.file.Paths;
+import java.util.List;
+
+@Service
+public class UploadHistoryService {
+    
+    @Autowired
+    private UploadRecordRepository uploadRecordRepository;
+    
+    private final Path fileStorageLocation = Paths.get("uploads").toAbsolutePath().normalize();
+
+    public void recordUpload(String filename, String username, int successCount, int failureCount) {
+        UploadRecord record = new UploadRecord(filename, username, successCount, failureCount);
+        uploadRecordRepository.save(record);
+    }
+
+    public List<UploadRecord> getAllUploads() {
+        return uploadRecordRepository.findAllByOrderByUploadTimeDesc();
+    }
+    
+    public Resource loadFileAsResource(String fileName) throws IOException {
+        try {
+            Path filePath = this.fileStorageLocation.resolve(fileName).normalize();
+            Resource resource = new UrlResource(filePath.toUri());
+            if (resource.exists()) {
+                return resource;
+            } else {
+                throw new IOException("File not found " + fileName);
+            }
+        } catch (MalformedURLException ex) {
+            throw new IOException("File not found " + fileName, ex);
+        }
+    }
+}
+
+package com.bnpp.bb.primeservices.controller;
+
+import com.bnpp.bb.primeservices.service.UploadHistoryService;
+import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.core.io.Resource;
+import org.springframework.http.HttpHeaders;
+import org.springframework.http.ResponseEntity;
+import org.springframework.web.bind.annotation.GetMapping;
+import org.springframework.web.bind.annotation.PathVariable;
+import org.springframework.web.bind.annotation.RequestMapping;
+import org.springframework.web.bind.annotation.RestController;
+
+import java.io.IOException;
+
+@RestController
+@RequestMapping("/api")
+public class DownloadController {
+
+    @Autowired
+    private UploadHistoryService uploadHistoryService;
+
+    @GetMapping("/download/{fileName:.+}")
+    public ResponseEntity<Resource> downloadFile(@PathVariable String fileName) throws IOException {
+        // Load file as Resource
+        Resource resource = uploadHistoryService.loadFileAsResource(fileName);
+
+        // Determine content type
+        String contentType = "application/octet-stream";
+
+        return ResponseEntity.ok()
+                .contentType(MediaType.parseMediaType(contentType))
+                .header(HttpHeaders.CONTENT_DISPOSITION, "attachment; filename=\"" + resource.getFilename() + "\"")
+                .body(resource);
+    }
+}
