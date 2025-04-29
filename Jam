@@ -1,0 +1,407 @@
+import jakarta.persistence.*;
+import java.time.LocalDateTime;
+
+@Entity
+public class UploadRecord {
+    @Id
+    @GeneratedValue(strategy = GenerationType.IDENTITY)
+    private Long id;
+    
+    private String filename;
+    private String username;
+    private LocalDateTime uploadTime;
+    private int successCount;
+    private int failureCount;
+    
+    @Lob
+    @Column(columnDefinition = "BLOB")
+    private byte[] inputFileData;  // Stores the actual file content
+    
+    @Lob
+    @Column(columnDefinition = "BLOB")
+    private byte[] outputFileData; // Stores the processed file content
+    
+    // Constructors, getters, and setters
+    public UploadRecord() {
+    }
+    
+    public UploadRecord(String filename, String username, int successCount, int failureCount, 
+                      byte[] inputFileData, byte[] outputFileData) {
+        this.filename = filename;
+        this.username = username;
+        this.uploadTime = LocalDateTime.now();
+        this.successCount = successCount;
+        this.failureCount = failureCount;
+        this.inputFileData = inputFileData;
+        this.outputFileData = outputFileData;
+    }
+    
+    // Getters and setters for all fields
+    public Long getId() { return id; }
+    public void setId(Long id) { this.id = id; }
+    
+    public String getFilename() { return filename; }
+    public void setFilename(String filename) { this.filename = filename; }
+    
+    public String getUsername() { return username; }
+    public void setUsername(String username) { this.username = username; }
+    
+    public LocalDateTime getUploadTime() { return uploadTime; }
+    public void setUploadTime(LocalDateTime uploadTime) { this.uploadTime = uploadTime; }
+    
+    public int getSuccessCount() { return successCount; }
+    public void setSuccessCount(int successCount) { this.successCount = successCount; }
+    
+    public int getFailureCount() { return failureCount; }
+    public void setFailureCount(int failureCount) { this.failureCount = failureCount; }
+    
+    public byte[] getInputFileData() { return inputFileData; }
+    public void setInputFileData(byte[] inputFileData) { this.inputFileData = inputFileData; }
+    
+    public byte[] getOutputFileData() { return outputFileData; }
+    public void setOutputFileData(byte[] outputFileData) { this.outputFileData = outputFileData; }
+}
+
+
+
+
+@Service
+public class UploadHistoryService {
+    @Autowired
+    private UploadRecordRepository uploadRecordRepository;
+    
+    public void recordUpload(MultipartFile file, String username, 
+                           int successCount, int failureCount) throws IOException {
+        // Get the input file data
+        byte[] inputFileData = file.getBytes();
+        
+        // Process the file and get output data (example - modify as needed)
+        byte[] outputFileData = processFile(inputFileData);
+        
+        UploadRecord record = new UploadRecord(
+            file.getOriginalFilename(),
+            username,
+            successCount,
+            failureCount,
+            inputFileData,
+            outputFileData
+        );
+        
+        uploadRecordRepository.save(record);
+    }
+    
+    private byte[] processFile(byte[] inputData) {
+        // Your file processing logic here
+        // For demo, just return the input as output
+        return inputData.clone();
+    }
+    
+    public UploadRecord getUploadById(Long id) {
+        return uploadRecordRepository.findById(id)
+                .orElseThrow(() -> new RuntimeException("Record not found"));
+    }
+}
+
+
+
+
+
+@RestController
+@RequestMapping("/api/history")
+public class UploadHistoryController {
+    @Autowired
+    private UploadHistoryService uploadHistoryService;
+    
+    @GetMapping("/download/{id}")
+    public ResponseEntity<byte[]> downloadFile(
+            @PathVariable Long id,
+            @RequestParam String type) {
+        
+        UploadRecord record = uploadHistoryService.getUploadById(id);
+        byte[] fileData;
+        String fileName;
+        
+        if ("input".equals(type)) {
+            fileData = record.getInputFileData();
+            fileName = "input_" + record.getFilename();
+        } else if ("output".equals(type)) {
+            fileData = record.getOutputFileData();
+            fileName = "output_" + record.getFilename();
+        } else {
+            throw new RuntimeException("Invalid file type requested");
+        }
+        
+        HttpHeaders headers = new HttpHeaders();
+        headers.setContentType(MediaType.APPLICATION_OCTET_STREAM);
+        headers.setContentDispositionFormData("attachment", fileName);
+        
+        return new ResponseEntity<>(fileData, headers, HttpStatus.OK);
+    }
+}
+
+ALTER TABLE upload_record 
+ADD COLUMN input_file_data BYTEA,
+ADD COLUMN output_file_data BYTEA;
+
+<!DOCTYPE html>
+<html lang="en" xmlns:th="http://www.thymeleaf.org">
+<head>
+    <meta charset="UTF-8">
+    <title>Upload History | Bank Account Manager</title>
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css" rel="stylesheet">
+    <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.10.0/font/bootstrap-icons.css">
+    <style>
+        body {
+            background: linear-gradient(135deg, #1e3c72, #2a5298); 
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+            color: white;
+            padding: 2rem;
+        }
+        
+        :root {
+            --success-color: #28a745;
+            --fail-color: #dc3545;
+        }
+        
+        .history-card {
+            border-radius: 10px;
+            box-shadow: 0 4px 6px rgba(0,0,0,0.1); 
+            transition: transform 0.2s;
+            background-color: white;
+            color: #333;
+        }
+        
+        .history-card:hover {
+            transform: translateY(-3px);
+        }
+        
+        .success-badge {
+            background-color: var(--success-color);
+        }
+        
+        .fail-badge {
+            background-color: var(--fail-color); 
+        }
+        
+        .file-icon {
+            font-size: 1.5rem; 
+            color: #6c757d;
+        }
+        
+        .btn-primary {
+            background-color: white; 
+            color: #1e3c72;
+            border: 2px solid #1e3c72; 
+            padding: 0.3rem 0.8rem; 
+            font-weight: bold;
+        }
+        
+        .download-btn {
+            padding: 0.25rem 0.5rem;
+            font-size: 0.8rem;
+            margin-left: 5px;
+        }
+        
+        .table th {
+            background-color: #f8f9fa;
+        }
+        
+        .file-size {
+            font-size: 0.8rem;
+            color: #6c757d;
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <button onclick="window.location.href='/welcome'" class="btn btn-primary mb-4">Return to Dashboard</button>
+        <h1 class="my-4"><strong>HISTORY</strong></h1>
+        
+        <!-- Stats Cards -->
+        <div class="row mb-4">
+            <div class="col-md-4">
+                <div class="card text-white bg-success mb-3">
+                    <div class="card-body">
+                        <h5 class="card-title">Successful Records</h5> 
+                        <h2 id="totalSuccess" class="card-text">0</h2>
+                    </div>
+                </div>
+            </div>
+            <div class="col-md-4">
+                <div class="card text-white bg-danger mb-3">
+                    <div class="card-body">
+                        <h5 class="card-title">Failed Records</h5> 
+                        <h2 id="totalFail" class="card-text">0</h2>
+                    </div>
+                </div>
+            </div>
+            <div class="col-md-4">
+                <div class="card text-white bg-primary mb-3">
+                    <div class="card-body">
+                        <h5 class="card-title">Total Uploads</h5> 
+                        <h2 id="totalUploads" class="card-text">0</h2>
+                    </div>
+                </div>
+            </div>
+        </div>
+        
+        <!-- History Table -->
+        <div class="card history-card">
+            <div class="card-header bg-white">
+                <div class="input-group mb-3" style="max-width: 300px;"> 
+                    <span class="input-group-text"><i class="bi bi-search"></i></span> 
+                    <input type="text" id="searchInput" class="form-control" placeholder="Search..."> 
+                </div> 
+            </div> 
+            <div class="card-body"> 
+                <div class="table-responsive">
+                    <table class="table table-hover align-middle">
+                        <thead>
+                            <tr>
+                                <th>File</th>
+                                <th>Uploaded By</th> 
+                                <th>Date & Time</th>
+                                <th>Size</th>
+                                <th>Status</th>
+                                <th class="text-end">Actions</th>
+                            </tr>
+                        </thead>
+                        <tbody id="historyTable">
+                            <!-- Data will be inserted here -->
+                        </tbody>
+                    </table>
+                </div>
+            </div>
+        </div>
+    </div>
+    
+    <script>
+        document.addEventListener('DOMContentLoaded', () => {
+            fetch('/api/history')
+                .then(res => res.json())
+                .then(data => {
+                    // Update stats cards
+                    const totalSuccess = data.reduce((sum, record) => sum + record.successCount, 0);
+                    const totalFail = data.reduce((sum, record) => sum + record.failureCount, 0);
+                    document.getElementById('totalSuccess').textContent = totalSuccess;
+                    document.getElementById('totalFail').textContent = totalFail;
+                    document.getElementById('totalUploads').textContent = data.length;
+                    
+                    // Populate table
+                    const table = document.getElementById('historyTable');
+                    data.forEach(record => {
+                        const row = table.insertRow();
+                        
+                        // File name
+                        const fileCell = row.insertCell();
+                        fileCell.innerHTML = `
+                            <i class="bi bi-file-excel file-icon"></i>
+                            ${record.filename}
+                        `;
+                        
+                        // Uploaded by
+                        const userCell = row.insertCell();
+                        userCell.innerHTML = `
+                            <span class="badge bg-secondary">
+                                <i class="bi bi-person-fill"></i> ${record.username}
+                            </span>
+                        `;
+                        
+                        // Date & time
+                        const dateCell = row.insertCell();
+                        const uploadDate = new Date(record.uploadTime);
+                        dateCell.textContent = uploadDate.toLocaleString();
+                        
+                        // File size
+                        const sizeCell = row.insertCell();
+                        const inputSize = record.inputFileData ? formatFileSize(record.inputFileData.length) : 'N/A';
+                        sizeCell.innerHTML = `<span class="file-size">${inputSize}</span>`;
+                        
+                        // Status
+                        const statusCell = row.insertCell();
+                        statusCell.innerHTML = `
+                            <span class="badge success-badge">
+                                <i class="bi bi-check-circle"></i> ${record.successCount}
+                            </span>
+                            <span class="badge fail-badge ms-2">
+                                <i class="bi bi-x-circle"></i> ${record.failureCount}
+                            </span>
+                        `;
+                        
+                        // Download buttons
+                        const actionCell = row.insertCell();
+                        actionCell.className = "text-end";
+                        actionCell.innerHTML = `
+                            <button class="btn btn-success download-btn" onclick="downloadFile('${record.id}', 'input', '${record.filename}')">
+                                <i class="bi bi-download"></i> Input
+                            </button>
+                            <button class="btn btn-primary download-btn" onclick="downloadFile('${record.id}', 'output', 'output_${record.filename}')">
+                                <i class="bi bi-download"></i> Output
+                            </button>
+                        `;
+                    });
+                    
+                    // Add search functionality
+                    document.getElementById('searchInput').addEventListener('input', (e) => {
+                        const searchTerm = e.target.value.toLowerCase();
+                        const rows = table.getElementsByTagName('tr');
+                        
+                        Array.from(rows).forEach(row => {
+                            const text = row.textContent.toLowerCase();
+                            row.style.display = text.includes(searchTerm) ? "" : "none";
+                        });
+                    });
+                })
+                .catch(error => {
+                    console.error('Error fetching history:', error);
+                    alert('Error loading history. Please try again.');
+                });
+        });
+        
+        function downloadFile(recordId, fileType, fileName) {
+            // Show loading indicator
+            const originalText = event.target.innerHTML;
+            event.target.innerHTML = '<i class="bi bi-hourglass"></i> Loading...';
+            event.target.disabled = true;
+            
+            fetch(`/api/history/download/${recordId}?type=${fileType}`)
+                .then(response => {
+                    if (!response.ok) {
+                        throw new Error('File download failed');
+                    }
+                    return response.blob();
+                })
+                .then(blob => {
+                    // Create download link
+                    const url = window.URL.createObjectURL(blob);
+                    const a = document.createElement('a');
+                    a.href = url;
+                    a.download = fileName;
+                    document.body.appendChild(a);
+                    a.click();
+                    window.URL.revokeObjectURL(url);
+                    a.remove();
+                })
+                .catch(error => {
+                    console.error('Download error:', error);
+                    alert('Error downloading file: ' + error.message);
+                })
+                .finally(() => {
+                    // Restore button state
+                    event.target.innerHTML = originalText;
+                    event.target.disabled = false;
+                });
+        }
+        
+        function formatFileSize(bytes) {
+            if (bytes === 0) return '0 Bytes';
+            const k = 1024;
+            const sizes = ['Bytes', 'KB', 'MB', 'GB'];
+            const i = Math.floor(Math.log(bytes) / Math.log(k));
+            return parseFloat((bytes / Math.pow(k, i)).toFixed(2) + ' ' + sizes[i];
+        }
+    </script>
+</body>
+</html>
+
+
