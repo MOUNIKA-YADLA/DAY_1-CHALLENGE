@@ -1,0 +1,19 @@
+public void recordUpload(MultipartFile file, String username, 
+                           int successCount, int failureCount) throws IOException {
+        // Get the input file data
+        byte[] inputFileData = file.getBytes();
+        
+        // Process the file and get output data
+        byte[] outputFileData = processFile(inputFileData);
+        
+        UploadRecord record = new UploadRecord(
+            file.getOriginalFilename(),  // This now works because 'file' is MultipartFile
+            username,
+            successCount,
+            failureCount,
+            inputFileData,
+            outputFileData
+        );
+        
+        uploadRecordRepository.save(record);
+    }
