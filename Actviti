@@ -1,0 +1,104 @@
+// Your Controller
+@Controller
+@RequestMapping("/bank-accounts")
+public class BankAccountController {
+
+    @Autowired
+    private UploadHistoryService uploadHistoryService;
+
+    @Autowired
+    private BankAccountEXCELService excelService;
+
+    private byte[] lastGeneratedResultFile;
+
+    @GetMapping("/upload")
+    public String showUploadForm(Model model) {
+        return "bank-accounts/upload";  // upload.html
+    }
+
+    @PostMapping("/upload")
+    public String handleFileUpload(@RequestParam("file") MultipartFile file,
+                                   Model model,
+                                   Authentication authentication) {
+        if (file.isEmpty()) {
+            model.addAttribute("error", "Please select a file to upload");
+            return "bank-accounts/upload";
+        }
+
+        try {
+            // 1. Process the file
+            List<BankAccountUploadResult> results = excelService.processExcelFile(file);
+            lastGeneratedResultFile = excelService.generateResultFile(results); // Save in memory
+
+            // 2. Record upload history
+            String username = authentication != null ? authentication.getName() : "SYSTEM";
+            int successCount = (int) results.stream().filter(r -> r.isSuccess()).count();
+            int failureCount = results.size() - successCount;
+
+            uploadHistoryService.recordUpload(
+                    file,
+                    username,
+                    successCount,
+                    failureCount
+            );
+
+            // 3. Prepare response
+            model.addAttribute("results", results);
+            return "bank-accounts/upload-results";   // Go to upload-results.html
+
+        } catch (Exception e) {
+            model.addAttribute("error", "Error processing file: " + e.getMessage());
+            return "bank-accounts/upload";
+        }
+    }
+
+    @GetMapping("/download-result")
+    public void downloadResultFile(HttpServletResponse response) throws IOException {
+        if (lastGeneratedResultFile == null) {
+            response.sendError(HttpServletResponse.SC_NOT_FOUND, "No file available for download.");
+            return;
+        }
+
+        response.setContentType("application/vnd.openxmlformats-officedocument.spreadsheetml.sheet");
+        response.setHeader("Content-Disposition", "attachment; filename=\"upload_results.xlsx\"");
+
+        OutputStream outputStream = response.getOutputStream();
+        outputStream.write(lastGeneratedResultFile);
+        outputStream.flush();
+    }
+}. 
+
+
+<!DOCTYPE html>
+<html xmlns:th="http://www.thymeleaf.org">
+<head>
+    <title>Upload Results</title>
+</head>
+<body>
+
+<h2>Upload Results</h2>
+
+<table border="1">
+    <thead>
+        <tr>
+            <th>Row Number</th>
+            <th>Status</th>
+            <th>Message</th>
+        </tr>
+    </thead>
+    <tbody>
+    <tr th:each="result : ${results}">
+        <td th:text="${result.rowNumber}"></td>
+        <td th:text="${result.success ? 'Success' : 'Failure'}"></td>
+        <td th:text="${result.message}"></td>
+    </tr>
+    </tbody>
+</table>
+
+<br/>
+<a href="/bank-accounts/download-result">
+    <button>Download Result File</button>
+</a>
+
+</body>
+</html>
