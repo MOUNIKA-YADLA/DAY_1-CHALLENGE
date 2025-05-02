@@ -1,0 +1,305 @@
+Here's the complete HTML code with delete functionality and proper styling:
+
+```html
+<!DOCTYPE html>
+<html lang="en" xmlns:th="http://www.thymeleaf.org">
+<head>
+    <meta charset="UTF-8">
+    <title>Upload History | Bank Account Manager</title>
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css" rel="stylesheet">
+    <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.10.0/font/bootstrap-icons.css">
+    <style>
+        body {
+            background: linear-gradient(135deg, #13c72, #2a5298);
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+            color: white;
+            padding: 20px;
+        }
+        
+        :root {
+            --success-color: #28a745;
+            --fail-color: #dc3545;
+        }
+        
+        .history-card {
+            border-radius: 10px;
+            box-shadow: 0 4px 6px rgba(0,0,0,0.1);
+            transition: transform 0.2s;
+            background-color: rgba(255,255,255,0.9);
+            color: #333;
+        }
+        
+        .history-card:hover {
+            transform: translateY(-3px);
+        }
+        
+        .success-badge {
+            background-color: var(--success-color);
+        }
+        
+        .fail-badge {
+            background-color: var(--fail-color);
+        }
+        
+        .file-icon {
+            font-size: 1.5rem;
+            color: #6c757d;
+        }
+        
+        .btn.btn-primary {
+            background-color: white;
+            color: #1e3c72;
+            border: 2px solid #1e3c72;
+            padding: 0.3rem 0.8rem;
+            font-weight: bold;
+        }
+        
+        .btn-danger {
+            background-color: #dc3545;
+            color: white;
+        }
+        
+        .btn-danger:hover {
+            background-color: #c82333;
+        }
+        
+        .history-title {
+            font-size: 2rem;
+            font-weight: bold;
+            margin: 20px 0;
+            text-align: center;
+        }
+        
+        .action-btns {
+            display: flex;
+            gap: 5px;
+        }
+    </style>
+</head>
+<body>
+    <button onclick="window.location.href='/welcome'" class="btn btn-primary">Return to Dashboard</button>
+    <div class="history-title">HISTORY</div>
+    
+    <!-- Stats Cards -->
+    <div class="row mb-4">
+        <div class="col-md-4">
+            <div class="card text-white bg-success mb-3">
+                <div class="card-body">
+                    <h5 class="card-title">Successful Records</h5>
+                    <h2 id="totalSuccess" class="card-text">0</h2>
+                </div>
+            </div>
+        </div>
+        <div class="col-md-4">
+            <div class="card text-white bg-danger mb-3">
+                <div class="card-body">
+                    <h5 class="card-title">Failed Records</h5>
+                    <h2 id="totalFail" class="card-text">0</h2>
+                </div>
+            </div>
+        </div>
+        <div class="col-md-4">
+            <div class="card text-white bg-primary mb-3">
+                <div class="card-body">
+                    <h5 class="card-title">Total Uploads</h5>
+                    <h2 id="totalUploads" class="card-text">0</h2>
+                </div>
+            </div>
+        </div>
+    </div>
+    
+    <!-- History Table -->
+    <div class="card history-card">
+        <div class="card-header bg-white">
+            <div class="input-group mb-3" style="max-width: 300px;">
+                <span class="input-group-text"><i class="bi bi-search"></i></span>
+                <input type="text" id="searchInput" class="form-control" placeholder="Search...">
+            </div>
+        </div>
+        <div class="card-body">
+            <div class="table-responsive">
+                <table class="table table-hover align-middle">
+                    <thead>
+                        <tr>
+                            <th>File</th>
+                            <th>Uploaded By</th>
+                            <th>Date & Time</th>
+                            <th class="text-end">Status</th>
+                            <th>Actions</th>
+                        </tr>
+                    </thead>
+                    <tbody id="historyTable">
+                        <!-- Data will be inserted here -->
+                    </tbody>
+                </table>
+            </div>
+        </div>
+    </div>
+    
+    <!-- Delete Confirmation Modal -->
+    <div class="modal fade" id="deleteModal" tabindex="-1" aria-hidden="true">
+        <div class="modal-dialog">
+            <div class="modal-content">
+                <div class="modal-header">
+                    <h5 class="modal-title">Confirm Deletion</h5>
+                    <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+                </div>
+                <div class="modal-body">
+                    <p>Are you sure you want to delete <strong id="fileNameToDelete"></strong>?</p>
+                    <p class="text-danger">This action cannot be undone.</p>
+                </div>
+                <div class="modal-footer">
+                    <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Cancel</button>
+                    <button type="button" class="btn btn-danger" id="confirmDeleteBtn">Delete</button>
+                </div>
+            </div>
+        </div>
+    </div>
+    
+    <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/js/bootstrap.bundle.min.js"></script>
+    <script>
+        let currentDeleteId = null;
+        
+        document.addEventListener('DOMContentLoaded', () => {
+            fetch('/api/history')
+                .then(res => res.json())
+                .then(data => {
+                    // Update stats cards
+                    const totalSuccess = data.reduce((sum, record) => sum + record.successCount, 0);
+                    const totalFail = data.reduce((sum, record) => sum + record.failureCount, 0);
+                    document.getElementById('totalSuccess').textContent = totalSuccess;
+                    document.getElementById('totalFail').textContent = totalFail;
+                    document.getElementById('totalUploads').textContent = data.length;
+                    
+                    // Populate table
+                    const table = document.getElementById('historyTable');
+                    data.forEach(record => {
+                        const row = table.insertRow();
+                        row.innerHTML = `
+                            <td>
+                                <i class="bi bi-file-excel file-icon"></i>
+                                ${record.filename}
+                            </td>
+                            <td>
+                                <span class="badge bg-secondary">
+                                    <i class="bi bi-person-fill"></i> ${record.username}
+                                </span>
+                            </td>
+                            <td>
+                                ${new Date(record.uploadTime).toLocaleString()}
+                            </td>
+                            <td class="text-end">
+                                <span class="badge success-badge">
+                                    <i class="bi bi-check-circle"></i> ${record.successCount}
+                                </span>
+                                <span class="badge fail-badge ms-2">
+                                    <i class="bi bi-x-circle"></i> ${record.failureCount}
+                                </span>
+                            </td>
+                            <td>
+                                <div class="action-btns">
+                                    <button class="btn btn-sm btn-primary" onclick="downloadFile('${record.filename}')">
+                                        <i class="bi bi-download"></i>
+                                    </button>
+                                    <button class="btn btn-sm btn-danger" onclick="confirmDelete('${record.id}', '${record.filename}')">
+                                        <i class="bi bi-trash"></i>
+                                    </button>
+                                </div>
+                            </td>
+                        `;
+                    });
+                    
+                    // Add search functionality
+                    document.getElementById('searchInput').addEventListener('input', (e) => {
+                        const searchTerm = e.target.value.toLowerCase();
+                        const rows = table.getElementsByTagName('tr');
+                        Array.from(rows).forEach(row => {
+                            const text = row.textContent.toLowerCase();
+                            row.style.display = text.includes(searchTerm) ? '' : 'none';
+                        });
+                    });
+                });
+        });
+        
+        function confirmDelete(id, filename) {
+            currentDeleteId = id;
+            document.getElementById('fileNameToDelete').textContent = filename;
+            const modal = new bootstrap.Modal(document.getElementById('deleteModal'));
+            modal.show();
+        }
+        
+        document.getElementById('confirmDeleteBtn').addEventListener('click', async () => {
+            try {
+                const response = await fetch(`/api/history/${currentDeleteId}`, {
+                    method: 'DELETE'
+                });
+                
+                if (response.ok) {
+                    location.reload();
+                } else {
+                    alert('Failed to delete record');
+                }
+            } catch (error) {
+                console.error('Error:', error);
+                alert('An error occurred while deleting');
+            }
+        });
+        
+        function downloadFile(filename) {
+            const link = document.createElement('a');
+            link.href = `/api/download/${encodeURIComponent(filename)}`;
+            link.download = filename;
+            document.body.appendChild(link);
+            link.click();
+            document.body.removeChild(link);
+        }
+    </script>
+</body>
+</html>
+```
+
+### Backend Changes Needed:
+
+1. **Add Delete Endpoint** (in your controller):
+
+```java
+@DeleteMapping("/api/history/{id}")
+public ResponseEntity<?> deleteHistoryRecord(@PathVariable Long id) {
+    try {
+        uploadHistoryService.deleteRecordAndFile(id);
+        return ResponseEntity.ok().build();
+    } catch (Exception e) {
+        return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR)
+                .body("Error deleting record: " + e.getMessage());
+    }
+}
+```
+
+2. **Service Method**:
+
+```java
+public void deleteRecordAndFile(Long id) throws IOException {
+    Optional<UploadRecord> record = uploadRecordRepository.findById(id);
+    if (record.isPresent()) {
+        // Delete the file
+        Path filePath = Paths.get("uploads").resolve(record.get().getFilename());
+        Files.deleteIfExists(filePath);
+        
+        // Delete the record
+        uploadRecordRepository.deleteById(id);
+    } else {
+        throw new IOException("Record not found");
+    }
+}
+```
+
+This implementation includes:
+- Properly styled delete buttons for each record
+- Confirmation modal before deletion
+- Search functionality
+- Stats cards showing counts
+- Download functionality
+- Clean, responsive design
+- Proper error handling
+
+The delete functionality will remove both the database record and the actual file from 
