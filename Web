@@ -1,0 +1,78 @@
+package com.bnpp.pb.puma.ui.gwt.client.broker;
+
+import com.bnpp.pb.common.coreui.gwt.client.gxt3.base.JspExportGridToolbar;
+import com.bnpp.pb.common.coreui.gwt.client.gxt3.ui.grid.DetailTableView;
+import com.bnpp.pb.common.coreui.gwt.client.ui.grid.DynamicDetailManagedWindow;
+import com.bnpp.pb.common.coreui.gwt.client.ui.form.DynamicDetailPanelView;
+import com.bnpp.pb.common.constants.AppIdsConstantsType;
+import com.bnpp.pb.common.coreui.gwt.client.ui.profile.AbstractBaseProfile;
+import com.google.gwt.user.client.ui.Frame;
+import com.google.gwt.user.client.ui.VerticalPanel;
+
+public class BrokerBOWindow extends DynamicDetailManagedWindow {
+
+    protected DetailTableView tableView;
+
+    private BrokerBOWindow() {
+        super();
+        setTitle("Google Search Embedded");
+        setWidth(1200);
+        setHeight(700);
+        addGoogleFrame();  // Add Google here
+    }
+
+    @Override
+    protected JspExportGridToolbar createGridToolBar() {
+        // Removed filter bar entirely
+        return null;
+    }
+
+    private void addGoogleFrame() {
+        Frame googleFrame = new Frame("https://www.google.com");
+        googleFrame.setSize("100%", "100%");
+        googleFrame.getElement().setAttribute("frameBorder", "0");
+
+        VerticalPanel panel = new VerticalPanel();
+        panel.setSize("100%", "100%");
+        panel.add(googleFrame);
+
+        setWidget(panel);
+    }
+
+    @Override
+    public String getGwtId() {
+        return "google-search";
+    }
+
+    @Override
+    public String getAppId() {
+        return AppIdsConstantsType.APP_BROKER.getCode();
+    }
+
+    @Override
+    public DetailTableView getTableView() {
+        return tableView;
+    }
+
+    @Override
+    protected DynamicDetailPanelView createDetailPanelView() {
+        return new BrokerBODetail();
+    }
+
+    @Override
+    public AbstractBaseProfile createProfile() {
+        return new BrokerBOProfile(tableView);
+    }
+
+    @Override
+    public String getTitle() {
+        return "Google Embedded Search";
+    }
+
+    public static DynamicDetailManagedWindow getInstance() {
+        if (instance == null) {
+            instance = new BrokerBOWindow();
+        }
+        return instance;
+    }
+}
