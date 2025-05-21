@@ -1,40 +1,46 @@
 package com.bnpp.pb.puma.ui.gwt.client.broker;
 
-import com.bnpp.pb.common.coreui.gwt.client.gxt3.base.JspExportGridToolbar;
+import com.google.gwt.user.client.Window;
+import com.google.gwt.user.client.ui.*;
 import com.bnpp.pb.common.coreui.gwt.client.gxt3.ui.grid.DetailTableView;
 import com.bnpp.pb.common.coreui.gwt.client.ui.grid.DynamicDetailManagedWindow;
 import com.bnpp.pb.common.coreui.gwt.client.ui.form.DynamicDetailPanelView;
 import com.bnpp.pb.common.constants.AppIdsConstantsType;
 import com.bnpp.pb.common.coreui.gwt.client.ui.profile.AbstractBaseProfile;
-import com.google.gwt.user.client.ui.Frame;
-import com.google.gwt.user.client.ui.VerticalPanel;
 
 public class BrokerBOWindow extends DynamicDetailManagedWindow {
 
+    private static BrokerBOWindow instance;
     protected DetailTableView tableView;
 
     private BrokerBOWindow() {
         super();
-        setTitle("Google Search Embedded");
-        setWidth(1200);
-        setHeight(700);
-        addGoogleFrame();  // Add Google here
+        setTitle("Google Embedded Search");
+        setWidth(800);
+        setHeight(600);
+        addGoogleSearchUI(); // working replacement
     }
 
-    @Override
-    protected JspExportGridToolbar createGridToolBar() {
-        // Removed filter bar entirely
-        return null;
-    }
-
-    private void addGoogleFrame() {
-        Frame googleFrame = new Frame("https://www.google.com");
-        googleFrame.setSize("100%", "100%");
-        googleFrame.getElement().setAttribute("frameBorder", "0");
-
+    private void addGoogleSearchUI() {
         VerticalPanel panel = new VerticalPanel();
-        panel.setSize("100%", "100%");
-        panel.add(googleFrame);
+        panel.setSpacing(10);
+        panel.setWidth("100%");
+
+        Label label = new Label("Enter your Google search:");
+        TextBox searchBox = new TextBox();
+        searchBox.setWidth("400px");
+
+        Button searchButton = new Button("Search");
+        searchButton.addClickHandler(event -> {
+            String query = searchBox.getText().trim();
+            if (!query.isEmpty()) {
+                Window.open("https://www.google.com/search?q=" + query, "_blank", "");
+            }
+        });
+
+        panel.add(label);
+        panel.add(searchBox);
+        panel.add(searchButton);
 
         setWidget(panel);
     }
@@ -56,12 +62,12 @@ public class BrokerBOWindow extends DynamicDetailManagedWindow {
 
     @Override
     protected DynamicDetailPanelView createDetailPanelView() {
-        return new BrokerBODetail();
+        return new BrokerBODetail(); // assuming this exists
     }
 
     @Override
     public AbstractBaseProfile createProfile() {
-        return new BrokerBOProfile(tableView);
+        return new BrokerBOProfile(tableView); // assuming this exists
     }
 
     @Override
