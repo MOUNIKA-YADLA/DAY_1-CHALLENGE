@@ -1,0 +1,30 @@
+package com.bnpp.pb.puma.ui.gwt.client.broker;
+
+import com.google.gwt.user.client.ui.Frame;
+import com.sencha.gxt.widget.core.client.Window;
+
+public class GoogleBOWindow extends Window {
+
+    public GoogleBOWindow() {
+        // Configure window properties
+        setHeadingText("BNP PARIBAS - Google");
+        setPixelSize(1024, 700);
+        setMaximizable(true);
+        setMinimizable(true);
+        setResizable(true);
+        setCollapsible(true);
+        setModal(false);
+        setClosable(true);
+
+        // Create and add Google Frame directly
+        Frame googleFrame = new Frame("https://www.google.com");
+        googleFrame.setSize("100%", "100%");
+        add(googleFrame);
+    }
+
+    public static void showWindow() {
+        GoogleBOWindow window = new GoogleBOWindow();
+        window.center();
+        window.show();
+    }
+}
