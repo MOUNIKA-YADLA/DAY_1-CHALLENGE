@@ -1,0 +1,144 @@
+package com.bnpp.pb.puma.ui.gwt.client.broker;
+
+import com.bnpp.pb.common.coreui.gwt.client.gxt3.base.JspExportGridToolbar;
+import com.bnpp.pb.common.coreui.gwt.client.gxt3.ui.filter.HiddenFilter;
+import com.bnpp.pb.common.coreui.gwt.client.gxt3.ui.grid.GridToolbar;
+import com.bnpp.pb.common.coreui.gwt.client.gxt3.ui.grid.TableView;
+import com.bnpp.pb.common.coreui.gwt.client.gxt3.ui.grid.profile.AbstractBaseProfile;
+import com.bnpp.pb.puma.ui.gwt.client.ui.filter.DynamicFieldFilter;
+import com.bnpp.pb.puma.ui.gwt.client.ui.form.DynamicDetailPanelView;
+import com.bnpp.pb.puma.ui.gwt.client.ui.grid.DetailTableView;
+import com.bnpp.pb.puma.ui.gwt.client.ui.grid.DynamicDetailManagedWindow;
+import com.bnpp.pb.puma.ui.gwt.shared.AppIdsConstantsType;
+import com.bnpp.pb.common.coreui.gwt.client.gxt3.ui.filter.AbstractFilter;
+import com.bnpp.pb.puma.common.constants.PumaConstants;
+import com.google.gwt.user.client.ui.Frame;
+import com.sencha.gxt.widget.core.client.ContentPanel;
+import com.sencha.gxt.widget.core.client.TabPanel;
+import com.sencha.gxt.widget.core.client.container.VerticalLayoutContainer;
+
+import java.util.ArrayList;
+import java.util.Collection;
+
+public class BrokerBOWindow extends DynamicDetailManagedWindow {
+    private static BrokerBOWindow instance;
+    protected DetailTableView tableView;
+    private TabPanel tabPanel;
+    private ContentPanel googlePanel;
+
+    private BrokerBOWindow() {
+        super();
+    }
+
+    @Override
+    protected void onRender() {
+        super.onRender();
+        
+        // Create main container
+        VerticalLayoutContainer container = new VerticalLayoutContainer();
+        this.add(container);
+        
+        // Create tab panel
+        tabPanel = new TabPanel();
+        tabPanel.setBorders(false);
+        container.add(tabPanel, new VerticalLayoutContainer.VerticalLayoutData(1, 1));
+        
+        // Add broker tab
+        ContentPanel brokerPanel = new ContentPanel();
+        brokerPanel.setHeadingText("Broker Data");
+        brokerPanel.add(createBrokerContent());
+        tabPanel.add(brokerPanel);
+        
+        // Add Google tab
+        googlePanel = new ContentPanel();
+        googlePanel.setHeadingText("Google Integration");
+        Frame googleFrame = new Frame("https://www.google.com");
+        googleFrame.setSize("100%", "100%");
+        googlePanel.add(googleFrame);
+        tabPanel.add(googlePanel);
+    }
+
+    private TableView createBrokerContent() {
+        this.tableView = new BrokerBOTableView(this);
+        return tableView;
+    }
+
+    @Override
+    protected GridToolbar createGridToolBar() {
+        return new JspExportGridToolbar(tableView, true);
+    }
+
+    @Override
+    public String getGwtId() {
+        return "broker";
+    }
+
+    @Override
+    public String getAppId() {
+        return AppIdsConstantsType.APP_BROKER.getCode();
+    }
+
+    @Override
+    public TableView createTableView() {
+        return createBrokerContent();
+    }
+
+    public static synchronized BrokerBOWindow getInstance() {
+        if (instance == null) {
+            instance = new BrokerBOWindow();
+        }
+        return instance;
+    }
+
+    @Override
+    protected DynamicDetailPanelView createDetailPanelView() {
+        return new BrokerBODetail();
+    }
+
+    @Override
+    public AbstractBaseProfile createProfile() {
+        return new BrokerBOProfile(tableView);
+    }
+
+    @Override
+    public DetailTableView getTableView() {
+        if (tableView == null) {
+            createTableView();
+        }
+        return tableView;
+    }
+
+    @Override
+    public String getTitle() {
+        return "Brokers";
+    }
+
+    @Override
+    protected void onBeforeDrillDownFilterPopulate(String[] keyFieldNameArray,
+            Collection<AbstractFilter> removeBrokerFilterList) {
+        removeBrokerFilterList = new ArrayList<>();
+        if (null != getTableView().getFiltersBar().getFilters() 
+                && getTableView().getFiltersBar().getFilters().size() > 0) {
+            for (AbstractFilter brokerfilter : getTableView().getFiltersBar().getFilters()) {
+                if (brokerfilter instanceof DynamicFieldFilter || brokerfilter instanceof HiddenFilter) {
+                    removeBrokerFilterList.add(brokerfilter);
+                }
+                if (brokerfilter.getFilterFieldName().equalsIgnoreCase(PumaConstants.FS_FILTER_ID) 
+                        || brokerfilter.getFilterFieldName().equalsIgnoreCase(PumaConstants.ATTRIBUTE_NAME_FILTER)
+                        || brokerfilter.getFilterFieldName().equalsIgnoreCase(PumaConstants.STRATEGY_TYPE_FILTER)
+                        || brokerfilter.getFilterFieldName().equalsIgnoreCase(PumaConstants.ACCOUNT_ROLE_FILTER)
+                        || brokerfilter.getFilterFieldName().equalsIgnoreCase(PumaConstants.IGNORE_FILTER)) {
+                    ((BrokerBOFilterBar) getTableView().getFiltersBar())
+                            .getAdvancedSearch()
+                            .enableComboBoxandMenuItem(brokerfilter.getFilterValue());
+                }
+            }
+            if (removeBrokerFilterList.size() > 0) {
+                getTableView().getFiltersBar().getFilters().removeAll(removeBrokerFilterList);
+                for (AbstractFilter filter : removeBrokerFilterList) {
+                    filter.getFieldsWrapperContainer().removeFromParent();
+                }
+            }
+        }
+    }
+}
