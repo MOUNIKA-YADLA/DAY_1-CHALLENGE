@@ -1,0 +1,77 @@
+package com.bnpp.pb.puma.ui.gwt.client.broker;
+
+import com.google.gwt.user.client.ui.Frame;
+import com.sencha.gxt.widget.core.client.Window;
+import com.sencha.gxt.widget.core.client.button.ToolButton;
+import com.sencha.gxt.widget.core.client.container.FitLayoutContainer;
+import com.sencha.gxt.widget.core.client.event.HideEvent;
+import com.sencha.gxt.widget.core.client.event.HideEvent.HideHandler;
+
+public class BrokerBOWindow extends Window {
+    private static BrokerBOWindow instance;
+    private Frame googleFrame;
+
+    private BrokerBOWindow() {
+        initWindow();
+        initComponents();
+    }
+
+    private void initWindow() {
+        // Basic window configuration
+        setHeading("Google Integration");
+        setPixelSize(800, 600);
+        setMinimizable(true);
+        setMaximizable(true);
+        setModal(false);
+        setBlinkModal(true);
+        setLayout(new FitLayoutContainer());
+        
+        // Add close handler
+        addHideHandler(new HideHandler() {
+            @Override
+            public void onHide(HideEvent event) {
+                // Cleanup when window is closed
+                if (googleFrame != null) {
+                    googleFrame.removeFromParent();
+                }
+            }
+        });
+        
+        // Add maximize/restore button
+        addTool(new ToolButton(ToolButton.MAXIMIZE) {
+            @Override
+            protected void onClick() {
+                if (isMaximized()) {
+                    restore();
+                } else {
+                    maximize();
+                }
+            }
+        });
+    }
+
+    private void initComponents() {
+        // Create the Google frame
+        googleFrame = new Frame("https://www.google.com");
+        googleFrame.setSize("100%", "100%");
+        
+        // Add to window using fit layout
+        add(googleFrame);
+    }
+
+    public static BrokerBOWindow get() {
+        if (instance == null) {
+            instance = new BrokerBOWindow();
+        }
+        return instance;
+    }
+
+    public void showWindow() {
+        show();
+        center();
+    }
+
+    public void hideWindow() {
+        hide();
+    }
+}
