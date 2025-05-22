@@ -1,0 +1,95 @@
+package com.bnpp.pb.puma.ui.gwt.client.broker;
+
+import com.bnpp.pb.puma.ui.gwt.client.ui.grid.DynamicDetailManagedWindow;
+import com.google.gwt.user.client.ui.Frame;
+import com.sencha.gxt.widget.core.client.ContentPanel;
+import com.sencha.gxt.widget.core.client.container.FitLayoutContainer;
+
+public class BrokerBOWindow extends DynamicDetailManagedWindow {
+    private static BrokerBOWindow instance;
+    private Frame googleFrame;
+
+    private BrokerBOWindow() {
+        super();
+        initializeWindow();
+    }
+
+    private void initializeWindow() {
+        // Window configuration
+        setHeading("Google Integration");
+        setPixelSize(1024, 768);  // Optimal size for web content
+        setMaximizable(true);
+        setMinimizable(true);
+        setLayout(new FitLayoutContainer());
+
+        // Create Google frame with security restrictions in mind
+        googleFrame = new Frame("https://www.google.com");
+        googleFrame.setSize("100%", "100%");
+        googleFrame.getElement().setAttribute("sandbox", "allow-same-origin allow-scripts");
+        
+        // Main content panel
+        ContentPanel mainPanel = new ContentPanel();
+        mainPanel.setHeaderVisible(false);
+        mainPanel.setBorders(false);
+        mainPanel.add(googleFrame);
+        
+        add(mainPanel);
+    }
+
+    // Minimal implementations for required abstract methods
+    @Override
+    protected DynamicDetailPanelView createDetailPanelView() {
+        return new DynamicDetailPanelView() {
+            @Override public void initializeComponents() {}
+            @Override public void refresh() {}
+        };
+    }
+
+    @Override
+    protected GridToolbar createGridToolBar() {
+        return null;  // No toolbar needed
+    }
+
+    @Override
+    public TableView createTableView() {
+        return null;  // No table view needed
+    }
+
+    @Override
+    public AbstractBaseProfile createProfile() {
+        return null;  // No profile needed
+    }
+
+    @Override
+    public DetailTableView getTableView() {
+        return null;  // No table view needed
+    }
+
+    @Override
+    public String getTitle() {
+        return "Google Integration";
+    }
+
+    @Override
+    public String getGwtId() {
+        return "google-integration-window";
+    }
+
+    @Override
+    public String getAppId() {
+        return "GOOGLE_FRAME";
+    }
+
+    public static synchronized BrokerBOWindow getInstance() {
+        if (instance == null) {
+            instance = new BrokerBOWindow();
+        }
+        return instance;
+    }
+
+    @Override
+    protected void onBeforeDrillDownFilterPopulate(String[] keyFieldNameArray,
+            Collection<AbstractFilter> filters) {
+        // No filter handling needed
+    }
+}
