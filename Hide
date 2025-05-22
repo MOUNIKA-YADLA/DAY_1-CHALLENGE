@@ -1,0 +1,57 @@
+package com.bnpp.pb.puma.ui.gwt.client.broker;
+
+import com.bnpp.pb.puma.ui.gwt.client.ui.form.DynamicDetailPanelView;
+import com.bnpp.pb.puma.ui.gwt.client.ui.grid.DynamicDetailManagedWindow;
+import com.google.gwt.user.client.ui.Frame;
+import com.sencha.gxt.widget.core.client.ContentPanel;
+
+public class BrokerBOWindow extends DynamicDetailManagedWindow {
+    private static BrokerBOWindow instance;
+    private Frame googleFrame;
+
+    private BrokerBOWindow() {
+        super();
+        initializeWindow();
+    }
+
+    private void initializeWindow() {
+        // Window settings
+        setHeadingText("Google Integration");
+        setSize(800, 600);
+        
+        // Create and add Google frame
+        googleFrame = new Frame("https://www.google.com");
+        googleFrame.setSize("100%", "100%");
+        
+        // Add to content panel
+        ContentPanel mainPanel = new ContentPanel();
+        mainPanel.setHeaderVisible(false);
+        mainPanel.setBorders(false);
+        mainPanel.add(googleFrame);
+        
+        setWidget(mainPanel);
+    }
+
+    @Override
+    protected DynamicDetailPanelView createDetailPanelView() {
+        // Return a minimal implementation since we're not using detail views
+        return new DynamicDetailPanelView() {
+            @Override
+            public void initializeComponents() {
+                // No components needed
+            }
+            
+            @Override
+            public void refresh() {
+                // No refresh needed
+            }
+        };
+    }
+
+    public static synchronized BrokerBOWindow getInstance() {
+        if (instance == null) {
+            instance = new BrokerBOWindow();
+        }
+        return instance;
+    }
+}
