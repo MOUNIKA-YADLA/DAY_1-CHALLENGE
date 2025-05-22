@@ -1,0 +1,52 @@
+package com.bnpp.pb.puma.ui.gwt.client.broker;
+
+import com.google.gwt.user.client.ui.Frame;
+import com.sencha.gxt.widget.core.client.Window;
+import com.sencha.gxt.widget.core.client.container.FitLayoutContainer;
+
+public class GoogleBOWindow extends Window {
+
+    private static GoogleBOWindow instance;
+    private Frame googleFrame;
+
+    private GoogleBOWindow() {
+        initializeWindow();
+    }
+
+    private void initializeWindow() {
+        // Basic window configuration
+        setHeadingText("Google Browser");
+        setPixelSize(1024, 768);
+        setMaximizable(true);
+        setMinimizable(true);
+        setResizable(true);
+        setCollapsible(true);
+        setModal(false);
+        setClosable(true);
+
+        // Create Google frame
+        googleFrame = new Frame("https://www.google.com");
+        googleFrame.setSize("100%", "100%");
+        
+        // Add to window with proper layout
+        FitLayoutContainer container = new FitLayoutContainer();
+        container.add(googleFrame);
+        add(container);
+    }
+
+    public static GoogleBOWindow getInstance() {
+        if (instance == null) {
+            instance = new GoogleBOWindow();
+        }
+        return instance;
+    }
+
+    // Optional: Add navigation methods
+    public void navigateTo(String url) {
+        googleFrame.setUrl(url);
+    }
+
+    public void refresh() {
+        googleFrame.setUrl(googleFrame.getUrl());
+    }
+}
