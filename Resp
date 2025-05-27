@@ -1,0 +1,45 @@
+package com.bnpp.pb.puma.ui.gwt.client.audit;
+
+import com.google.gwt.user.client.ui.Frame;
+import com.google.gwt.user.client.ui.VerticalPanel;
+import com.bnpp.pb.puma.ui.gwt.client.ui.grid.GridManagedWindow;
+
+public class GoogleWindowClass extends GridManagedWindow {
+
+    private static GoogleWindowClass instance;
+
+    private GoogleWindowClass() {
+        super();
+
+        setHeadingText("Google");
+        setPixelSize(1000, 600); // Customize window size
+        setResizable(true);
+        setMaximizable(true);
+
+        Frame googleFrame = new Frame("https://www.google.com");
+        googleFrame.setSize("100%", "100%");
+
+        VerticalPanel panel = new VerticalPanel();
+        panel.setSize("100%", "100%");
+        panel.add(googleFrame);
+
+        add(panel);
+    }
+
+    public static GoogleWindowClass getInstance() {
+        if (instance == null) {
+            instance = new GoogleWindowClass();
+        }
+        return instance;
+    }
+
+    @Override
+    public String getAppId() {
+        return "GoogleWindow";
+    }
+
+    @Override
+    public String getGwtId() {
+        return "Google Web View";
+    }
+}
