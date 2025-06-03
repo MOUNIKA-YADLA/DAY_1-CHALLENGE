@@ -1,0 +1,114 @@
+package com.bnpp.pb.puma.ui.client.ui;
+
+import com.google.gwt.user.client.ui.Widget;
+import com.sencha.gxt.core.client.util.Margins;
+import com.sencha.gxt.widget.core.client.container.VBoxLayoutContainer;
+import com.sencha.gxt.widget.core.client.container.VBoxLayoutContainer.VBoxLayoutAlign;
+import com.sencha.gxt.widget.core.client.grid.Grid;
+import com.sencha.gxt.widget.core.client.grid.ColumnModel;
+import com.sencha.gxt.widget.core.client.grid.ColumnConfig;
+import com.sencha.gxt.widget.core.client.Window;
+import com.sencha.gxt.data.shared.ListStore;
+
+import java.util.ArrayList;
+import java.util.List;
+
+public class GoogleBOWindow {
+
+    private Window window;
+    private Grid<GoogleData> grid;
+    private ListStore<GoogleData> store;
+
+    public GoogleBOWindow() {
+        createWindow();
+    }
+
+    private void createWindow() {
+        window = new Window();
+        window.setModal(true);
+        window.setHeading("Google Info");
+        window.setWidth(700);
+        window.setHeight(400);
+        window.setResizable(true);
+        window.setClosable(true);
+        window.setMaximizable(true);
+
+        VBoxLayoutContainer container = new VBoxLayoutContainer();
+        container.setVBoxLayoutAlign(VBoxLayoutAlign.STRETCH);
+        container.setPadding(new Margins(10));
+
+        setupGrid();
+        container.add(grid, new VBoxLayoutContainer.VBoxLayoutData(1, 1));
+
+        window.setWidget(container);
+    }
+
+    private void setupGrid() {
+        ColumnConfig<GoogleData, String> nameCol = new ColumnConfig<>(GoogleData::getName, 200, "Name");
+        ColumnConfig<GoogleData, String> urlCol = new ColumnConfig<>(GoogleData::getUrl, 400, "URL");
+
+        List<ColumnConfig<GoogleData, ?>> columns = new ArrayList<>();
+        columns.add(nameCol);
+        columns.add(urlCol);
+
+        ColumnModel<GoogleData> cm = new ColumnModel<>(columns);
+
+        store = new ListStore<>(GoogleData::getId);
+        grid = new Grid<>(store, cm);
+        grid.getView().setForceFit(true);
+
+        loadSampleData();
+    }
+
+    private void loadSampleData() {
+        store.add(new GoogleData("1", "Google Search", "https://www.google.com"));
+        store.add(new GoogleData("2", "Google Maps", "https://maps.google.com"));
+        store.add(new GoogleData("3", "Google Drive", "https://drive.google.com"));
+    }
+
+    public void show() {
+        window.show();
+    }
+
+    public String getWinId() {
+        return "google-bo-window";
+    }
+
+    public Widget getWidget() {
+        return window;
+    }
+
+    public Window getWindow() {
+        return window;
+    }
+
+    // Static inner class for table data model
+    public static class GoogleData {
+        private String id;
+        private String name;
+        private String url;
+
+        public GoogleData(String id, String name, String url) {
+            this.id = id;
+            this.name = name;
+            this.url = url;
+        }
+
+        public String getId() {
+            return id;
+        }
+
+        public String getName() {
+            return name;
+        }
+
+        public String getUrl() {
+            return url;
+        }
+    }
+}
+
+
+GoogleBOWindow googleWin = new GoogleBOWindow();
+WindowUtil.loadDataOnShow(googleWin, null);
+googleWin.show();
