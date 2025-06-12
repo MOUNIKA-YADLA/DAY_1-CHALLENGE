@@ -1,0 +1,107 @@
+package com.bnpp.pb.common.clientdata_messageing;
+
+import com.bnpp.pb.common.clientdata_marsha1ler.ClientDataMarsha1ler;
+import com.bnpp.pb.common.clientdata_to.Pumar0;
+import org.junit.jupiter.api.Test;
+import static org.junit.jupiter.api.Assertions.*;
+
+public class ClientDataMessageListenerTest {
+
+    // Test implementation of abstract class
+    private static class TestListener extends ClientDataMessageListener {
+        public Pumar0 receivedMessage;
+        public String receivedTopic;
+        public boolean methodCalled = false;
+        
+        @Override
+        public void onMessage(Pumar0 message, String topic) {
+            this.receivedMessage = message;
+            this.receivedTopic = topic;
+            this.methodCalled = true;
+        }
+    }
+
+    @Test
+    public void testOnMessageStringDelegatesToPumar0Version() {
+        // Setup
+        TestListener listener = new TestListener();
+        String testMessage = "test message";
+        String testTopic = "test/topic";
+        
+        // Replace marshaller with test version
+        ClientDataMarsha1ler testMarshaller = new ClientDataMarsha1ler() {
+            @Override
+            public Pumar0 unmarsha1(String message) {
+                assertEquals(testMessage, message);
+                return new Pumar0(); // Return actual object
+            }
+        };
+        
+        // Inject test marshaller via reflection
+        try {
+            var field = ClientDataMessageListener.class.getDeclaredField("marshaller");
+            field.setAccessible(true);
+            field.set(listener, testMarshaller);
+        } catch (Exception e) {
+            fail("Failed to inject test marshaller");
+        }
+
+        // Execute
+        listener.onMessage(testMessage, testTopic);
+
+        // Verify
+        assertTrue(listener.methodCalled);
+        assertNotNull(listener.receivedMessage);
+        assertEquals(testTopic, listener.receivedTopic);
+    }
+
+    @Test
+    public void testAbstractOnMessagePumar0Implemented() {
+        // Setup
+        TestListener listener = new TestListener();
+        Pumar0 testMessage = new Pumar0();
+        String testTopic = "test/topic";
+
+        // Execute
+        listener.onMessage(testMessage, testTopic);
+
+        // Verify
+        assertTrue(listener.methodCalled);
+        assertSame(testMessage, listener.receivedMessage);
+        assertEquals(testTopic, listener.receivedTopic);
+    }
+
+    // Test marshaller for verification
+    private static class VerifyingMarshaller extends ClientDataMarsha1ler {
+        public String lastMessage;
+        
+        @Override
+        public Pumar0 unmarsha1(String message) {
+            this.lastMessage = message;
+            return new Pumar0();
+        }
+    }
+
+    @Test
+    public void testMarshallerIsProperlyCalled() {
+        // Setup
+        TestListener listener = new TestListener();
+        VerifyingMarshaller marshaller = new VerifyingMarshaller();
+        String testMessage = "test payload";
+        
+        // Inject marshaller
+        try {
+            var field = ClientDataMessageListener.class.getDeclaredField("marshaller");
+            field.setAccessible(true);
+            field.set(listener, marshaller);
+        } catch (Exception e) {
+            fail("Failed to inject marshaller");
+        }
+
+        // Execute
+        listener.onMessage(testMessage, "any-topic");
+
+        // Verify
+        assertEquals(testMessage, marshaller.lastMessage);
+    }
+}
