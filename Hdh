@@ -1,0 +1,95 @@
+package com.bmp.pb.common.clientdata.lookup.resource;
+
+import org.junit.Before;
+import org.junit.Test;
+import java.io.InputStream;
+import java.util.List;
+import static org.junit.Assert.*;
+
+public class TryResourceLookupTest {
+
+    private TryResourceLookup resourceLookup;
+
+    @Before
+    public void setUp() {
+        resourceLookup = new TryResourceLookup();
+    }
+
+    @Test(timeout = 4000)
+    public void testGetResource_ExistingResource() throws Throwable {
+        // Test with a resource that should exist
+        String resourcePath = "test-config.xml";
+        String content = resourceLookup.getResource(resourcePath);
+        
+        assertNotNull("Resource content should not be null", content);
+        assertFalse("Resource content should not be empty", content.isEmpty());
+    }
+
+    @Test(timeout = 4000)
+    public void testGetResource_NonExistingResource() throws Throwable {
+        // Test with a resource that shouldn't exist
+        String resourcePath = "non-existent-resource.txt";
+        String content = resourceLookup.getResource(resourcePath);
+        
+        assertNull("Non-existent resource should return null", content);
+    }
+
+    @Test(timeout = 4000)
+    public void testGetResourceAsStream_ExistingResource() throws Throwable {
+        // Test with a resource that should exist
+        String resourcePath = "test-config.xml";
+        try (InputStream stream = resourceLookup.getResourceAsStream(resourcePath)) {
+            assertNotNull("Resource stream should not be null", stream);
+            assertTrue("Resource stream should have content", stream.available() > 0);
+        }
+    }
+
+    @Test(timeout = 4000)
+    public void testGetResourceAsStream_NonExistingResource() throws Throwable {
+        // Test with a resource that shouldn't exist
+        String resourcePath = "non-existent-resource.txt";
+        InputStream stream = resourceLookup.getResourceAsStream(resourcePath);
+        
+        assertNull("Non-existent resource should return null stream", stream);
+    }
+
+    @Test(timeout = 4000)
+    public void testResourceExists_ExistingResource() throws Throwable {
+        String resourcePath = "test-config.xml";
+        boolean exists = resourceLookup.resourceExists(resourcePath);
+        assertTrue("Existing resource should return true", exists);
+    }
+
+    @Test(timeout = 4000)
+    public void testResourceExists_NonExistingResource() throws Throwable {
+        String resourcePath = "non-existent-resource.txt";
+        boolean exists = resourceLookup.resourceExists(resourcePath);
+        assertFalse("Non-existent resource should return false", exists);
+    }
+
+    @Test(timeout = 4000)
+    public void testGetResourcePaths_ValidDirectory() throws Throwable {
+        String directoryPath = "META-INF/";
+        List<String> paths = resourceLookup.getResourcePaths(directoryPath);
+        
+        assertNotNull("Resource paths should not be null", paths);
+        assertFalse("Should find at least one resource in directory", paths.isEmpty());
+    }
+
+    @Test(timeout = 4000)
+    public void testGetResourcePaths_InvalidDirectory() throws Throwable {
+        String directoryPath = "non-existent-directory/";
+        List<String> paths = resourceLookup.getResourcePaths(directoryPath);
+        
+        assertNotNull("Resource paths should not be null", paths);
+        assertTrue("Non-existent directory should return empty list", paths.isEmpty());
+    }
+
+    @Test(timeout = 4000)
+    public void testGetResourcePaths_NullInput() throws Throwable {
+        List<String> paths = resourceLookup.getResourcePaths(null);
+        
+        assertNotNull("Null input should return empty list", paths);
+        assertTrue("Null input should return empty list", paths.isEmpty());
+    }
+}
