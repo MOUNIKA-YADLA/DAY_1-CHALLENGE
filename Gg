@@ -1,0 +1,66 @@
+package com.bnpp.pb.common.clientdata.lookup;
+
+import com.bnpp.pb.common.clientdata.service.intf.UserManagerEntitlementService;
+import com.bnpp.pb.common.clientdata.to.ManagerApplication;
+import com.bnpp.pb.common.core.data.cache.Cache;
+import com.bnpp.pb.common.core.data.cache.CacheFactory;
+import org.junit.Before;
+import org.junit.Test;
+import org.mockito.InjectMocks;
+import org.mockito.Mock;
+import org.mockito.MockitoAnnotations;
+
+import static org.junit.Assert.*;
+import static org.mockito.Mockito.*;
+
+public class UserManagerApplicationProviderTest {
+
+    @InjectMocks
+    private UserManagerApplicationProvider provider;
+    
+    @Mock
+    private UserManagerEntitlementService userManagerEntitlementService;
+    
+    @Mock
+    private Cache<String, ManagerApplication> applicationCache;
+    
+    @Mock
+    private ManagerApplication mockManagerApplication;
+
+    @Before
+    public void setUp() {
+        MockitoAnnotations.openMocks(this);
+        provider.applicationCache = applicationCache; // Set private field via reflection if needed
+    }
+
+    @Test(timeout = 4000)
+    public void testGetManagerApplication() throws Exception {
+        String testUser = "testUser";
+        when(userManagerEntitlementService.getManagerApplication(testUser))
+            .thenReturn(mockManagerApplication);
+        
+        ManagerApplication result = provider.getManagerApplication(testUser);
+        
+        assertNotNull(result);
+        assertEquals(mockManagerApplication, result);
+        verify(userManagerEntitlementService).getManagerApplication(testUser);
+    }
+
+    @Test(timeout = 4000)
+    public void testGetManagerApplicationWithCache() throws Exception {
+        String testUser = "testUser";
+        when(applicationCache.get(testUser)).thenReturn(mockManagerApplication);
+        
+        ManagerApplication result = provider.getManagerApplication(testUser);
+        
+        assertNotNull(result);
+        assertEquals(mockManagerApplication, result);
+        verify(applicationCache).get(testUser);
+        verify(userManagerEntitlementService, never()).getManagerApplication(testUser);
+    }
+
+    @Test(timeout = 4000)
+    public void testCacheInitialization() throws Exception {
+        assertNotNull(provider.applicationCache);
+    }
+}
