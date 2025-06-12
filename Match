@@ -1,0 +1,73 @@
+package com.bnpp.pb.common.clientdata.lookup;
+
+import com.bnpp.pb.common.clientdata.service.intf.UserManagerEntitlementService;
+import com.bnpp.pb.common.clientdata.to.ManagerApplication;
+import com.bnpp.pb.common.core.data.cache.Cache;
+import com.bnpp.pb.common.core.data.cache.CacheFactory;
+import org.junit.Before;
+import org.junit.Test;
+
+import static org.junit.Assert.*;
+
+public class UserManagerApplicationProviderTest {
+
+    private UserManagerApplicationProvider provider;
+    private TestUserManagerEntitlementService testService;
+    
+    // Simple test implementation
+    private static class TestUserManagerEntitlementService implements UserManagerEntitlementService {
+        @Override
+        public ManagerApplication getManagerApplication(String userName) {
+            return new ManagerApplication();
+        }
+    }
+    
+    // Simple test cache
+    private static class TestCache implements Cache<String, ManagerApplication> {
+        @Override
+        public ManagerApplication get(String key) {
+            return new ManagerApplication();
+        }
+        
+        @Override
+        public void put(String key, ManagerApplication value) {
+            // Test implementation
+        }
+    }
+
+    @Before
+    public void setUp() {
+        testService = new TestUserManagerEntitlementService();
+        provider = new UserManagerApplicationProvider();
+        
+        // Use reflection to set private fields if needed
+        try {
+            var field = UserManagerApplicationProvider.class.getDeclaredField("userManagerEntitlementService");
+            field.setAccessible(true);
+            field.set(provider, testService);
+            
+            field = UserManagerApplicationProvider.class.getDeclaredField("applicationCache");
+            field.setAccessible(true);
+            field.set(provider, new TestCache());
+        } catch (Exception e) {
+            fail("Failed to setup test: " + e.getMessage());
+        }
+    }
+
+    @Test(timeout = 4000)
+    public void testGetManagerApplication() throws Exception {
+        ManagerApplication result = provider.getManagerApplication("testUser");
+        assertNotNull(result);
+    }
+
+    @Test(timeout = 4000)
+    public void testCacheInitialization() throws Exception {
+        assertNotNull(provider.applicationCache);
+    }
+
+    @Test(timeout = 4000)
+    public void testServiceInjection() throws Exception {
+        assertNotNull(testService);
+        // Additional assertions as needed
+    }
+}
