@@ -1,0 +1,43 @@
+package com.bnpp.pb.common.clientdata.intr;
+
+import com.bnpp.pb.common.clientdata.to.AbstractParty70;
+import org.junit.Test;
+import static org.junit.Assert.*;
+
+public class IPrincipalTest {
+
+    // Test implementation of the abstract class
+    private static class TestPrincipal extends IPrincipal {
+        // Implement any abstract methods here if needed
+    }
+
+    @Test(timeout = 4000)
+    public void testClassHierarchy() throws Throwable {
+        TestPrincipal principal = new TestPrincipal();
+        assertTrue("Should be instance of AbstractParty70", 
+                  principal instanceof AbstractParty70);
+        assertTrue("Should be instance of IGroup", 
+                  principal instanceof IGroup);
+    }
+
+    @Test(timeout = 4000)
+    public void testAbstractClassCanBeExtended() throws Throwable {
+        TestPrincipal principal = new TestPrincipal();
+        assertNotNull("Concrete implementation should work", principal);
+    }
+
+    @Test(timeout = 4000)
+    public void testAbstractClassCannotBeDirectlyInstantiated() throws Throwable {
+        try {
+            // This is the correct way to test abstract class instantiation
+            Class.forName("com.bnpp.pb.common.clientdata.intr.IPrincipal")
+                .newInstance();
+            fail("Should throw InstantiationException");
+        } catch (InstantiationException e) {
+            // Expected behavior for abstract class
+            assertTrue(e.getMessage().contains("abstract"));
+        } catch (Exception e) {
+            fail("Unexpected exception: " + e.getClass().getName());
+        }
+    }
+}
