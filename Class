@@ -1,0 +1,115 @@
+package com.bnpp.pb.common.clientdata.enums;
+
+import org.junit.Test;
+import java.util.List;
+import static org.junit.Assert.*;
+
+public class EERegionCodesTest {
+
+    @Test(timeout = 4000)
+    public void testEnumValuesExist() throws Throwable {
+        assertNotNull(EERegionCodes.APKEY);
+        assertNotNull(EERegionCodes.EMEA);
+        assertNotNull(EERegionCodes.APAC);
+        assertEquals(3, EERegionCodes.values().length);
+    }
+
+    @Test(timeout = 4000)
+    public void testGetTypeCode() throws Throwable {
+        assertEquals("AVERY", EERegionCodes.APKEY.getTypeCode());
+        assertEquals("EMEA", EERegionCodes.EMEA.getTypeCode());
+        assertEquals("APAC", EERegionCodes.APAC.getTypeCode());
+    }
+
+    @Test(timeout = 4000)
+    public void testGetCodeValue() throws Throwable {
+        assertEquals("AVERY", EERegionCodes.APKEY.getCodeValue());
+        assertEquals("EMEA", EERegionCodes.EMEA.getCodeValue());
+        assertEquals("APAC", EERegionCodes.APAC.getCodeValue());
+    }
+
+    @Test(timeout = 4000)
+    public void testGetDescr() throws Throwable {
+        assertEquals("AVERY", EERegionCodes.APKEY.getDescr());
+        assertEquals("EMEA", EERegionCodes.EMEA.getDescr());
+        assertEquals("APAC", EERegionCodes.APAC.getDescr());
+    }
+
+    @Test(timeout = 4000)
+    public void testGetCodeDescription() throws Throwable {
+        assertEquals("AVERY", EERegionCodes.APKEY.getCodeDescription());
+        assertEquals("EMEA", EERegionCodes.EMEA.getCodeDescription());
+        assertEquals("APAC", EERegionCodes.APAC.getCodeDescription());
+    }
+
+    @Test(timeout = 4000)
+    public void testGetByCode() throws Throwable {
+        assertEquals(EERegionCodes.APKEY, EERegionCodes.getByCode("AVERY"));
+        assertEquals(EERegionCodes.EMEA, EERegionCodes.getByCode("EMEA"));
+        assertEquals(EERegionCodes.APAC, EERegionCodes.getByCode("APAC"));
+        assertNull(EERegionCodes.getByCode("INVALID"));
+    }
+
+    @Test(timeout = 4000)
+    public void testGetByName() throws Throwable {
+        assertEquals(EERegionCodes.APKEY, EERegionCodes.getByName("AVERY"));
+        assertEquals(EERegionCodes.EMEA, EERegionCodes.getByName("EMEA"));
+        assertEquals(EERegionCodes.APAC, EERegionCodes.getByName("APAC"));
+        assertNull(EERegionCodes.getByName("INVALID"));
+    }
+
+    @Test(timeout = 4000)
+    public void testFindByTypeCode() throws Throwable {
+        assertEquals(EERegionCodes.APKEY, EERegionCodes.findByTypeCode("AVERY"));
+        assertEquals(EERegionCodes.EMEA, EERegionCodes.findByTypeCode("EMEA"));
+        assertEquals(EERegionCodes.APAC, EERegionCodes.findByTypeCode("APAC"));
+        assertNull(EERegionCodes.findByTypeCode("INVALID"));
+    }
+
+    @Test(timeout = 4000)
+    public void testFindByDisplayValue() throws Throwable {
+        assertEquals(EERegionCodes.APKEY, EERegionCodes.findByDisplayValue("AVERY"));
+        assertEquals(EERegionCodes.EMEA, EERegionCodes.findByDisplayValue("EMEA"));
+        assertEquals(EERegionCodes.APAC, EERegionCodes.findByDisplayValue("APAC"));
+        assertNull(EERegionCodes.findByDisplayValue("INVALID"));
+    }
+
+    @Test(timeout = 4000)
+    public void testGetKeyValuePairs() throws Throwable {
+        String[][] pairs = EERegionCodes.getKeyValuePairs();
+        assertNotNull(pairs);
+        assertEquals(3, pairs.length);
+        assertEquals("AVERY", pairs[0][0]);
+        assertEquals("AVERY", pairs[0][1]);
+        assertEquals("APAC", pairs[2][0]);
+        assertEquals("APAC", pairs[2][1]);
+    }
+
+    @Test(timeout = 4000)
+    public void testGetKeyNameValuePairs() throws Throwable {
+        String[][] pairs = EERegionCodes.getKeyNameValuePairs();
+        assertNotNull(pairs);
+        assertEquals(3, pairs.length);
+        assertEquals("APKEY", pairs[0][0]);
+        assertEquals("AVERY", pairs[0][1]);
+        assertEquals("APAC", pairs[2][0]);
+        assertEquals("APAC", pairs[2][1]);
+    }
+
+    @Test(timeout = 4000)
+    public void testGetSortedValues() throws Throwable {
+        List<IEnumExtension> sortedValues = EERegionCodes.getSortedValues();
+        assertNotNull(sortedValues);
+        assertEquals(3, sortedValues.size());
+        assertTrue(sortedValues.contains(EERegionCodes.APKEY));
+        assertTrue(sortedValues.contains(EERegionCodes.APAC));
+    }
+
+    @Test(timeout = 4000)
+    public void testVALUESList() throws Throwable {
+        List<EERegionCodes> values = EERegionCodes.VALUES;
+        assertNotNull(values);
+        assertEquals(3, values.size());
+        assertTrue(values.contains(EERegionCodes.EMEA));
+    }
+}
