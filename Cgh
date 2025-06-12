@@ -1,0 +1,46 @@
+package com.bnpp.pb.common.clientdata.lookup.cache;
+
+import com.bnpp.pb.common.clientdata.to.Party;
+import org.junit.Test;
+import static org.junit.Assert.*;
+
+public class PartyEntityQueryCacheTest {
+
+    // Proper test implementation of abstract class
+    private static class TestPartyEntityQueryCache extends PartyEntityQueryCache<TestParty> {
+        @Override
+        public TestParty doQuery(Long key) {
+            return new TestParty(key); // Simple implementation for testing
+        }
+    }
+
+    // Proper test implementation of Party
+    private static class TestParty extends Party {
+        private final Long partyId;
+
+        public TestParty(Long partyId) {
+            this.partyId = partyId;
+        }
+
+        @Override
+        public Long getPartyId() {
+            return partyId;
+        }
+    }
+
+    @Test(timeout = 4000)
+    public void testGetId_WithValidParty() throws Throwable {
+        TestPartyEntityQueryCache cache = new TestPartyEntityQueryCache();
+        Long expectedId = 12345L;
+        TestParty party = new TestParty(expectedId);
+
+        Long result = cache.getId(party);
+        assertEquals(expectedId, result);
+    }
+
+    @Test(timeout = 4000, expected = NullPointerException.class)
+    public void testGetId_WithNullParty() throws Throwable {
+        TestPartyEntityQueryCache cache = new TestPartyEntityQueryCache();
+        cache.getId(null);
+    }
+}
