@@ -1,0 +1,99 @@
+package com.knops.db.common.digentdata.enums;
+
+import org.junit.Test;
+import java.util.List;
+import static org.junit.Assert.*;
+
+public class ClientOnboardingInfoStatusTest {
+
+    @Test(timeout = 4000)
+    public void testEnumValuesExist() throws Throwable {
+        assertNotNull(ClientOnboardingInfoStatus.A);
+        assertNotNull(ClientOnboardingInfoStatus.I);
+        assertEquals(2, ClientOnboardingInfoStatus.values().length);
+    }
+
+    @Test(timeout = 4000)
+    public void testGetCode() throws Throwable {
+        assertEquals("A", ClientOnboardingInfoStatus.A.getCode());
+        assertEquals("I", ClientOnboardingInfoStatus.I.getCode());
+    }
+
+    @Test(timeout = 4000)
+    public void testGetCodeValue() throws Throwable {
+        assertEquals("A", ClientOnboardingInfoStatus.A.getCodeValue());
+        assertEquals("I", ClientOnboardingInfoStatus.I.getCodeValue());
+    }
+
+    @Test(timeout = 4000)
+    public void testGetName() throws Throwable {
+        assertEquals("Active", ClientOnboardingInfoStatus.A.getName());
+        assertEquals("Inactive", ClientOnboardingInfoStatus.I.getName());
+    }
+
+    @Test(timeout = 4000)
+    public void testGetCodeDescription() throws Throwable {
+        assertEquals("Active", ClientOnboardingInfoStatus.A.getCodeDescription());
+        assertEquals("Inactive", ClientOnboardingInfoStatus.I.getCodeDescription());
+    }
+
+    @Test(timeout = 4000)
+    public void testToString() throws Throwable {
+        assertEquals("A", ClientOnboardingInfoStatus.A.toString());
+        assertEquals("I", ClientOnboardingInfoStatus.I.toString());
+    }
+
+    @Test(timeout = 4000)
+    public void testGetByCode() throws Throwable {
+        assertEquals(ClientOnboardingInfoStatus.A, ClientOnboardingInfoStatus.getByCode("A"));
+        assertEquals(ClientOnboardingInfoStatus.I, ClientOnboardingInfoStatus.getByCode("I"));
+        assertNull(ClientOnboardingInfoStatus.getByCode("INVALID"));
+    }
+
+    @Test(timeout = 4000)
+    public void testGetByName() throws Throwable {
+        assertEquals(ClientOnboardingInfoStatus.A, ClientOnboardingInfoStatus.getByName("Active"));
+        assertEquals(ClientOnboardingInfoStatus.I, ClientOnboardingInfoStatus.getByName("Inactive"));
+        assertNull(ClientOnboardingInfoStatus.getByName("INVALID"));
+    }
+
+    @Test(timeout = 4000)
+    public void testFindByCode() throws Throwable {
+        assertEquals(ClientOnboardingInfoStatus.A, ClientOnboardingInfoStatus.findByCode("A"));
+        assertEquals(ClientOnboardingInfoStatus.I, ClientOnboardingInfoStatus.findByCode("I"));
+        assertNull(ClientOnboardingInfoStatus.findByCode("INVALID"));
+    }
+
+    @Test(timeout = 4000)
+    public void testFindByDisplayValue() throws Throwable {
+        assertEquals(ClientOnboardingInfoStatus.A, ClientOnboardingInfoStatus.findByDisplayValue("Active"));
+        assertEquals(ClientOnboardingInfoStatus.I, ClientOnboardingInfoStatus.findByDisplayValue("Inactive"));
+        assertNull(ClientOnboardingInfoStatus.findByDisplayValue("INVALID"));
+    }
+
+    @Test(timeout = 4000)
+    public void testGetCustomDataAdapterType() throws Throwable {
+        List<ClientOnboardingInfoStatus> customTypes = ClientOnboardingInfoStatus.getCustomDataAdapterType();
+        assertEquals(2, customTypes.size());
+        assertTrue(customTypes.contains(ClientOnboardingInfoStatus.A));
+        assertTrue(customTypes.contains(ClientOnboardingInfoStatus.I));
+    }
+
+    @Test(timeout = 4000)
+    public void testKeyValuePairs() throws Throwable {
+        String[][] pairs = ClientOnboardingInfoStatus.keyValuePairs;
+        assertNotNull(pairs);
+        assertEquals(2, pairs.length);
+        assertEquals("A", pairs[0][0]);
+        assertEquals("I", pairs[1][0]);
+    }
+
+    @Test(timeout = 4000)
+    public void testGetSortedValues() throws Throwable {
+        List<EnumExtension> sortedValues = ClientOnboardingInfoStatus.getSortedValues();
+        assertNotNull(sortedValues);
+        assertEquals(2, sortedValues.size());
+        assertTrue(sortedValues.contains(ClientOnboardingInfoStatus.A));
+        assertTrue(sortedValues.contains(ClientOnboardingInfoStatus.I));
+    }
+}
