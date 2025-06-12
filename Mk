@@ -1,0 +1,68 @@
+package com.bnpp.pb.common.clientdata.lookup;
+
+import com.bnpp.pb.common.clientdata.enums.PartyType;
+import com.bnpp.pb.common.clientdata.intf.*;
+import org.junit.Before;
+import org.junit.Test;
+
+import java.util.*;
+
+import static org.mockito.Mockito.*;
+
+public class ClientDataLoaderTest {
+
+    private ClientDataLoader clientDataLoader;
+    private ClientMasterLookupService mockLookupService;
+
+    @Before
+    public void setUp() {
+        clientDataLoader = new ClientDataLoader();
+        mockLookupService = mock(ClientMasterLookupService.class);
+        clientDataLoader.setClientMasterService(mockLookupService);
+    }
+
+    @Test
+    public void testLoadSitesAndCall() throws Exception {
+        List<Site> mockSites = new ArrayList<>();
+        Site mockSite = mock(Site.class);
+        IHub mockHub = mock(IHub.class);
+        IAccountExec mockExec = mock(IAccountExec.class);
+        IManagerBrief mockManager = mock(IManagerBrief.class);
+
+        when(mockSite.getHubs()).thenReturn(Arrays.asList(mockHub));
+        when(mockHub.getAccountReps()).thenReturn(Arrays.asList(mockExec));
+        when(mockExec.getManagers()).thenReturn(Arrays.asList(mockManager));
+        when(mockExec.getRepUserName()).thenReturn("testUser");
+        when(mockExec.getRepCode()).thenReturn("R001");
+        when(mockManager.getPartyVid()).thenReturn(123L);
+        when(mockSite.getPartyVid()).thenReturn(1L);
+        when(mockHub.getPartyVid()).thenReturn(2L);
+
+        when(mockLookupService.getAllSiteHubHierarchy(any())).thenReturn(Arrays.asList(mockSite));
+
+        clientDataLoader.call();
+    }
+
+    @Test
+    public void testLoadUser() {
+        ClientDataLoader.loadUser("mockUser");
+    }
+
+    @Test
+    public void testDrillToManagers() {
+        Manager mockManager = mock(Manager.class);
+        PartyBrief mockPartyBrief = mock(PartyBrief.class);
+        PartyBrief childBrief = mock(PartyBrief.class);
+
+        when(mockLookupService.lookupManagersByPartyIds(any(), any())).thenReturn(Arrays.asList(mockManager));
+        when(mockManager.getReportingHierarchy()).thenReturn(Arrays.asList(mockPartyBrief));
+        when(mockPartyBrief.getPartyType()).thenReturn(PartyType.SUBMANAGER);
+        when(mockPartyBrief.getPartyType().getCode()).thenReturn("SUBMANAGER");
+        when(mockPartyBrief.getPartyVid()).thenReturn(100L);
+        when(mockPartyBrief.getChildren()).thenReturn(Arrays.asList(childBrief));
+        when(childBrief.getPartyVid()).thenReturn(200L);
+
+        clientDataLoader.drillToManagers(Arrays.asList(mockManager));
+    }
+
+}
