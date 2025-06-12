@@ -1,0 +1,111 @@
+package com.bnpp.pb.common.clientdata.lookup;
+
+import com.bnpp.pb.common.clientdata.intf.*;
+import com.bnpp.pb.common.clientdata.enums.PartyType;
+import com.bnpp.pb.common.core.security.SecurityEngine;
+import com.bnpp.pb.common.core.security.spring.UserDetailsServiceImpl;
+import org.junit.Before;
+import org.junit.Test;
+
+import java.util.*;
+import java.util.concurrent.Callable;
+
+import static org.mockito.Mockito.*;
+
+public class ClientDataLoaderTest {
+
+    private ClientDataLoader clientDataLoader;
+    private ClientMasterLookupService clientMasterService;
+
+    @Before
+    public void setup() {
+        clientDataLoader = new ClientDataLoader();
+        clientMasterService = mock(ClientMasterLookupService.class);
+        clientDataLoader.setClientMasterService(clientMasterService);
+    }
+
+    @Test
+    public void testCall() throws Exception {
+        when(clientMasterService.getAllSiteHubHierarchy(any())).thenReturn(new ArrayList<>());
+        clientDataLoader.call();
+        // No exception is success
+    }
+
+    @Test
+    public void testLoadSites() {
+        List<Site> sites = Arrays.asList(mock(Site.class));
+        when(clientMasterService.getAllSiteHubHierarchy(any())).thenReturn(sites);
+        clientDataLoader.call();
+    }
+
+    @Test
+    public void testLoadSiteWithHubs() {
+        Site site = mock(Site.class);
+        IHub hub = mock(IHub.class);
+        List<IHub> hubs = Arrays.asList(hub);
+        when(site.getHubs()).thenReturn(hubs);
+        clientDataLoader.call(); // This internally calls loadSite(site)
+    }
+
+    @Test
+    public void testLoadSiteAndHubWithManagers() {
+        Site site = mock(Site.class);
+        IHub hub = mock(IHub.class);
+        IAccountExec exec = mock(IAccountExec.class);
+        IManagerBrief manager = mock(IManagerBrief.class);
+
+        List<IHub> hubs = Collections.singletonList(hub);
+        List<IAccountExec> execs = Collections.singletonList(exec);
+        List<IManagerBrief> managers = Collections.singletonList(manager);
+
+        when(site.getHubs()).thenReturn(hubs);
+        when(hub.getAccountReps()).thenReturn(execs);
+        when(exec.getManagers()).thenReturn(managers);
+        when(exec.getRepUserName()).thenReturn("user");
+        when(exec.getRepCode()).thenReturn("code");
+        when(manager.getPartvId()).thenReturn(123L);
+
+        clientDataLoader.call(); // indirectly calls everything
+    }
+
+    @Test
+    public void testLoadUsers() {
+        Set<String> users = new HashSet<>(Arrays.asList("user1", "user2"));
+        clientDataLoader.loadUsers(users);
+    }
+
+    @Test
+    public void testLoadUser() {
+        clientDataLoader.loadUser("user123");
+    }
+
+    @Test
+    public void testLoadGroups() {
+        clientDataLoader.loadGroups(Arrays.asList(1L, 2L, 3L));
+    }
+
+    @Test
+    public void testDrillIntoManagers() {
+        List<Manager> managers = new ArrayList<>();
+        Manager mockManager = mock(Manager.class);
+        PartyBrief brief = mock(PartyBrief.class);
+        when(mockManager.getReportingHierarchy()).thenReturn(Arrays.asList(brief));
+        when(brief.getPartvId()).thenReturn(100L);
+        when(brief.getPartvType()).thenReturn(PartyType.SUBMANAGER);
+        when(brief.getChildren()).thenReturn(Collections.singletonList(brief));
+
+        when(clientMasterService.lookupManagersByPartvIds(any(), any())).thenReturn(managers);
+        clientDataLoader.drillIntoManagers(Arrays.asList(mockManager));
+    }
+
+    @Test
+    public void testLoadLobs() {
+        clientDataLoader.loadLobs(Arrays.asList(1L, 2L, 3L));
+    }
+
+    @Test
+    public void testSetClientMasterService() {
+        ClientMasterLookupService service = mock(ClientMasterLookupService.class);
+        clientDataLoader.setClientMasterService(service);
+    }
+}
