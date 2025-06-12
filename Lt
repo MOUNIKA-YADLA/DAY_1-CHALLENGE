@@ -1,0 +1,76 @@
+package com.bnpp.pb.common.clientdata.lookup;
+
+import com.bnpp.pb.common.clientdata.marshaller.ClientDataMarshaller;
+import com.bnpp.pb.common.clientdata.to.PumaTO;
+import org.junit.Before;
+import org.junit.Test;
+
+import static org.junit.Assert.*;
+import static org.mockito.Mockito.*;
+
+public class ClientDataMessageListenerTest {
+
+    private TestClientDataMessageListener listener;
+    private PumaTO mockPumaTO;
+    private ClientDataMarshaller mockMarshaller;
+
+    @Before
+    public void setUp() {
+        mockPumaTO = mock(PumaTO.class);
+        mockMarshaller = mock(ClientDataMarshaller.class);
+
+        // Create test instance with mocked marshaller and pumaTO
+        listener = new TestClientDataMessageListener(mockMarshaller, mockPumaTO);
+    }
+
+    @Test
+    public void testOnMessage_StringCallsAbstractWithUnmarshalledObject() {
+        String inputMessage = "sample-message";
+        String topic = "test-topic";
+
+        // Configure mock marshaller
+        when(mockMarshaller.unmarshal(inputMessage)).thenReturn(mockPumaTO);
+
+        // Call the method to test
+        listener.onMessage(inputMessage, topic);
+
+        // Verify that the overridden method was called with correct parameters
+        assertTrue(listener.wasCalled);
+        assertEquals(mockPumaTO, listener.lastPumaTO);
+        assertEquals(topic, listener.lastTopic);
+    }
+
+    // A concrete test class extending the abstract one
+    private static class TestClientDataMessageListener extends ClientDataMessageListener {
+
+        private final ClientDataMarshaller marshaller;
+        private final PumaTO pumaTO;
+
+        public boolean wasCalled = false;
+        public PumaTO lastPumaTO;
+        public String lastTopic;
+
+        public TestClientDataMessageListener(ClientDataMarshaller marshaller, PumaTO pumaTO) {
+            this.marshaller = marshaller;
+            this.pumaTO = pumaTO;
+        }
+
+        @Override
+        public void onMessage(PumaTO message, String topic) {
+            wasCalled = true;
+            lastPumaTO = message;
+            lastTopic = topic;
+        }
+
+        // Helper for testability – allows override
+        @Override
+        protected ClientDataMarshaller getMarshaller() {
+            return marshaller;
+        }
+
+        @Override
+        public final void onMessage(String message, String topic) {
+            onMessage(getMarshaller().unmarshal(message), topic);
+        }
+    }
+}
