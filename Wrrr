@@ -1,0 +1,89 @@
+package com.bnpp.pb.common.clientdata_messageing;
+
+import com.bnpp.pb.common.clientdata_marshaller.ClientDataMarshaller;
+import com.bnpp.pb.common.clientdata_to.PumaTO;
+import org.junit.jupiter.api.Test;
+
+import java.lang.reflect.Field;
+
+import static org.junit.jupiter.api.Assertions.*;
+
+public class ClientDataMessageListenerTest {
+
+    // Test implementation of abstract class
+    private static class TestListener extends ClientDataMessageListener {
+        public PumaTO receivedMessage;
+        public String receivedTopic;
+        
+        @Override
+        public void onMessage(PumaTO message, String topic) {
+            this.receivedMessage = message;
+            this.receivedTopic = topic;
+        }
+    }
+
+    // Test marshaller implementation
+    private static class TestMarshaller extends ClientDataMarshaller {
+        public String lastInput;
+        public PumaTO output = new PumaTO();
+        
+        @Override
+        public PumaTO unmarshal(String message) {
+            this.lastInput = message;
+            return output;
+        }
+    }
+
+    @Test
+    public void onMessageString_ShouldUnmarshalAndDelegate() throws Exception {
+        // Arrange
+        TestListener listener = new TestListener();
+        TestMarshaller marshaller = new TestMarshaller();
+        String testMessage = "test message";
+        String testTopic = "test/topic";
+        
+        // Inject marshaller via reflection
+        Field marshallerField = ClientDataMessageListener.class.getDeclaredField("marshaller");
+        marshallerField.setAccessible(true);
+        marshallerField.set(listener, marshaller);
+
+        // Act
+        listener.onMessage(testMessage, testTopic);
+
+        // Assert
+        assertEquals(testMessage, marshaller.lastInput);
+        assertSame(marshaller.output, listener.receivedMessage);
+        assertEquals(testTopic, listener.receivedTopic);
+    }
+
+    @Test
+    public void onMessagePumaTO_ShouldStoreParameters() {
+        // Arrange
+        TestListener listener = new TestListener();
+        PumaTO testMessage = new PumaTO();
+        String testTopic = "test/topic";
+
+        // Act
+        listener.onMessage(testMessage, testTopic);
+
+        // Assert
+        assertSame(testMessage, listener.receivedMessage);
+        assertEquals(testTopic, listener.receivedTopic);
+    }
+
+    @Test
+    public void marshallerField_ShouldExistAndBeAccessible() throws Exception {
+        // Arrange & Act
+        Field marshallerField = ClientDataMessageListener.class.getDeclaredField("marshaller");
+        
+        // Assert
+        assertNotNull(marshallerField);
+        assertEquals(ClientDataMarshaller.class, marshallerField.getType());
+        
+        // Verify accessibility
+        assertDoesNotThrow(() -> {
+            marshallerField.setAccessible(true);
+            marshallerField.set(new TestListener(), new TestMarshaller());
+        });
+    }
+}
