@@ -1,0 +1,59 @@
+package com.bnpp.pb.common.clientdata.enums;
+
+import org.junit.Test;
+
+import static org.junit.Assert.assertEquals;
+import static org.junit.Assert.assertNotNull;
+
+public class BillingFrequencyTypeTest {
+
+    @Test(timeout = 4000)
+    public void testGetName() throws Throwable {
+        assertEquals("MonthLy", BillingFrequencyType.MONTHLY.getName());
+        assertEquals("On Trade", BillingFrequencyType.ON_TRADE.getName());
+    }
+
+    @Test(timeout = 4000)
+    public void testGetCode() throws Throwable {
+        assertEquals("Monthly", BillingFrequencyType.MONTHLY.getCode());
+        assertEquals("On Trade", BillingFrequencyType.ON_TRADE.getCode());
+    }
+
+    @Test(timeout = 4000)
+    public void testGetCodeDescription() throws Throwable {
+        assertEquals("MonthLy", BillingFrequencyType.MONTHLY.getCodeDescription());
+        assertEquals("On Trade", BillingFrequencyType.ON_TRADE.getCodeDescription());
+    }
+
+    @Test(timeout = 4000)
+    public void testGetCodeValue() throws Throwable {
+        assertEquals("Monthly", BillingFrequencyType.MONTHLY.getCodeValue());
+        assertEquals("On Trade", BillingFrequencyType.ON_TRADE.getCodeValue());
+    }
+
+    @Test(timeout = 4000)
+    public void testToString() throws Throwable {
+        assertEquals("Monthly", BillingFrequencyType.MONTHLY.toString());
+        assertEquals("On Trade", BillingFrequencyType.ON_TRADE.toString());
+    }
+
+    @Test(timeout = 4000)
+    public void testGetUsageType() throws Throwable {
+        BillingFrequencyType type = BillingFrequencyType.getUsageType("Monthly");
+        assertEquals(BillingFrequencyType.MONTHLY, type);
+    }
+
+    @Test(timeout = 4000)
+    public void testGetByName() throws Throwable {
+        BillingFrequencyType type = BillingFrequencyType.getByName("On Trade");
+        assertEquals(BillingFrequencyType.ON_TRADE, type);
+    }
+
+    @Test(timeout = 4000)
+    public void testKeyValuePairs() throws Throwable {
+        String[][] pairs = BillingFrequencyType.keyValuePairs;
+        assertNotNull(pairs);
+        assertEquals("Monthly", pairs[0][0]);
+        assertEquals("MonthLy", pairs[0][1]);
+    }
+}
