@@ -1,0 +1,49 @@
+package com.bnpp.pb.common.clientdata.intf;
+
+import com.bnpp.pb.common.clientdata.to.AbstractPartyTO;
+import org.junit.Test;
+import static org.junit.Assert.*;
+
+public class ISecurableTest {
+
+    // Test implementation of the abstract class
+    private static class TestSecurable extends ISecurable {
+        // Implement any abstract methods if they exist
+        // (No abstract methods shown in the provided code)
+    }
+
+    @Test(timeout = 4000)
+    public void testClassHierarchy() throws Throwable {
+        TestSecurable securable = new TestSecurable();
+        assertTrue("Should be instance of AbstractPartyTO", 
+                  securable instanceof AbstractPartyTO);
+        assertTrue("Should be instance of IGroup", 
+                  securable instanceof IGroup);
+    }
+
+    @Test(timeout = 4000)
+    public void testAbstractClassCannotBeInstantiated() throws Throwable {
+        try {
+            // This should fail since ISecurable is abstract
+            ISecurable securable = new ISecurable() {};
+            fail("Should not be able to instantiate abstract class directly");
+        } catch (Exception e) {
+            // Expected behavior
+        }
+    }
+
+    @Test(timeout = 4000)
+    public void testConcreteImplementationWorks() throws Throwable {
+        TestSecurable securable = new TestSecurable();
+        assertNotNull(securable);
+    }
+
+    @Test(timeout = 4000)
+    public void testInheritedMethods() throws Throwable {
+        TestSecurable securable = new TestSecurable();
+        
+        // Test any methods inherited from AbstractPartyTO
+        // Add specific assertions based on AbstractPartyTO's methods
+        assertNotNull(securable.toString());
+    }
+}
