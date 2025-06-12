@@ -1,0 +1,169 @@
+package com.bnpp.pb.common.clientdata.util;
+
+import com.bnpp.pb.common.clientdata.enums.CounterpartyEligibilitySource;
+import com.bnpp.pb.common.clientdata.enums.TradingEligibilitySourcesystem;
+import com.bnpp.pb.common.clientdata.to.CounterpartyEligibilityInputByParty;
+import org.junit.jupiter.api.Test;
+
+import java.util.Arrays;
+import java.util.Collections;
+import java.util.List;
+
+import static org.junit.jupiter.api.Assertions.assertEquals;
+
+class CacheUtilTest {
+
+    @Test
+    void getTrustCacheKey_withMethodNameAndPartyCodes() {
+        // Arrange
+        String methodName = "testMethod";
+        CounterpartyEligibilityInputByParty input = new TestCounterpartyEligibilityInputByParty(
+            Arrays.asList("CODE1", "CODE2"), 
+            null
+        );
+
+        // Act
+        String result = CacheUtil.getTrustCacheKey(methodName, input, null);
+
+        // Assert
+        assertEquals("testMethodCODE1.CODE2", result);
+    }
+
+    @Test
+    void getTrustCacheKey_withSinglePartyCode() {
+        // Arrange
+        String methodName = "testMethod";
+        CounterpartyEligibilityInputByParty input = new TestCounterpartyEligibilityInputByParty(
+            Collections.singletonList("CODE1"), 
+            null
+        );
+
+        // Act
+        String result = CacheUtil.getTrustCacheKey(methodName, input, null);
+
+        // Assert
+        assertEquals("testMethodCODE1", result);
+    }
+
+    @Test
+    void getTrustCacheKey_withTradingEligibilitySystem() {
+        // Arrange
+        String methodName = "testMethod";
+        CounterpartyEligibilityInputByParty input = new TestCounterpartyEligibilityInputByParty(
+            Arrays.asList("CODE1", "CODE2"), 
+            TradingEligibilitySourcesystem.SYSTEM1
+        );
+
+        // Act
+        String result = CacheUtil.getTrustCacheKey(methodName, input, null);
+
+        // Assert
+        assertEquals("testMethodCODE1.CODE2SYSTEM1", result);
+    }
+
+    @Test
+    void getTrustCacheKey_withCounterpartyEligibilitySources() {
+        // Arrange
+        String methodName = "testMethod";
+        CounterpartyEligibilityInputByParty input = new TestCounterpartyEligibilityInputByParty(
+            Arrays.asList("CODE1", "CODE2"), 
+            null
+        );
+        List<CounterpartyEligibilitySource> sources = Arrays.asList(
+            CounterpartyEligibilitySource.SOURCE1,
+            CounterpartyEligibilitySource.SOURCE2
+        );
+
+        // Act
+        String result = CacheUtil.getTrustCacheKey(methodName, input, sources);
+
+        // Assert
+        assertEquals("testMethodCODE1.CODE2SOURCE1SOURCE2", result);
+    }
+
+    @Test
+    void getTrustCacheKey_withAllComponents() {
+        // Arrange
+        String methodName = "testMethod";
+        CounterpartyEligibilityInputByParty input = new TestCounterpartyEligibilityInputByParty(
+            Arrays.asList("CODE1", "CODE2"), 
+            TradingEligibilitySourcesystem.SYSTEM1
+        );
+        List<CounterpartyEligibilitySource> sources = Arrays.asList(
+            CounterpartyEligibilitySource.SOURCE1,
+            CounterpartyEligibilitySource.SOURCE2
+        );
+
+        // Act
+        String result = CacheUtil.getTrustCacheKey(methodName, input, sources);
+
+        // Assert
+        assertEquals("testMethodCODE1.CODE2SYSTEM1SOURCE1SOURCE2", result);
+    }
+
+    @Test
+    void getTrustCacheKey_withEmptyPartyCodes() {
+        // Arrange
+        String methodName = "testMethod";
+        CounterpartyEligibilityInputByParty input = new TestCounterpartyEligibilityInputByParty(
+            Collections.emptyList(), 
+            null
+        );
+
+        // Act
+        String result = CacheUtil.getTrustCacheKey(methodName, input, null);
+
+        // Assert
+        assertEquals("testMethod", result);
+    }
+
+    @Test
+    void getTrustCacheKey_withNullPartyCodes() {
+        // Arrange
+        String methodName = "testMethod";
+        CounterpartyEligibilityInputByParty input = new TestCounterpartyEligibilityInputByParty(
+            null, 
+            null
+        );
+
+        // Act
+        String result = CacheUtil.getTrustCacheKey(methodName, input, null);
+
+        // Assert
+        assertEquals("testMethod", result);
+    }
+
+    @Test
+    void getTrustCacheKey_withNullInput() {
+        // Arrange
+        String methodName = "testMethod";
+
+        // Act
+        String result = CacheUtil.getTrustCacheKey(methodName, null, null);
+
+        // Assert
+        assertEquals("testMethod", result);
+    }
+
+    // Test implementation of CounterpartyEligibilityInputByParty for testing
+    private static class TestCounterpartyEligibilityInputByParty extends CounterpartyEligibilityInputByParty {
+        private final List<String> partyCodes;
+        private final TradingEligibilitySourcesystem tradingEligibilitySourcesystem;
+
+        public TestCounterpartyEligibilityInputByParty(List<String> partyCodes, 
+                                                      TradingEligibilitySourcesystem tradingEligibilitySourcesystem) {
+            this.partyCodes = partyCodes;
+            this.tradingEligibilitySourcesystem = tradingEligibilitySourcesystem;
+        }
+
+        @Override
+        public List<String> getPartyCodes() {
+            return partyCodes;
+        }
+
+        @Override
+        public TradingEligibilitySourcesystem getTradingEligibilitySourcesystem() {
+            return tradingEligibilitySourcesystem;
+        }
+    }
+}
