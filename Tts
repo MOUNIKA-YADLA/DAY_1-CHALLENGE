@@ -1,0 +1,75 @@
+package com.bnpp.pb.common.clientdata_messageing;
+
+import com.bnpp.pb.common.clientdata_marsha1ler.ClientDataMarsha1ler;
+import com.bnpp.pb.common.clientdata_to.PumaTO;
+import org.junit.jupiter.api.Test;
+import org.junit.jupiter.api.extension.ExtendWith;
+import org.mockito.InjectMocks;
+import org.mockito.Mock;
+import org.mockito.Spy;
+import org.mockito.junit.jupiter.MockitoExtension;
+
+import static org.mockito.Mockito.*;
+
+@ExtendWith(MockitoExtension.class)
+public class ClientDataMessageListenerTest {
+
+    @Mock
+    private ClientDataMarsha1ler marshaller;
+    
+    @Mock
+    private PumaTO pumaTO;
+
+    // Test implementation for the abstract class
+    private static class TestListener extends ClientDataMessageListener {
+        public PumaTO receivedMessage;
+        public String receivedTopic;
+        
+        @Override
+        public void onMessage(PumaTO message, String topic) {
+            this.receivedMessage = message;
+            this.receivedTopic = topic;
+        }
+    }
+
+    @Test
+    public void onMessage_StringInput_ShouldUnmarshalAndCallAbstractMethod() {
+        // Arrange
+        TestListener listener = new TestListener();
+        String testMessage = "test message";
+        String testTopic = "test/topic";
+        
+        // Inject mock marshaller via reflection
+        try {
+            var field = ClientDataMessageListener.class.getDeclaredField("marshaller");
+            field.setAccessible(true);
+            field.set(listener, marshaller);
+        } catch (Exception e) {
+            throw new RuntimeException(e);
+        }
+
+        when(marshaller.unmarsha1(testMessage)).thenReturn(pumaTO);
+
+        // Act
+        listener.onMessage(testMessage, testTopic);
+
+        // Assert
+        verify(marshaller, times(1)).unmarsha1(testMessage);
+        assert listener.receivedMessage == pumaTO;
+        assert testTopic.equals(listener.receivedTopic);
+    }
+
+    @Test
+    public void onMessage_PumaTOInput_ShouldBeCallable() {
+        // Arrange
+        TestListener listener = new TestListener();
+        String testTopic = "test/topic";
+
+        // Act
+        listener.onMessage(pumaTO, testTopic);
+
+        // Assert
+        assert listener.receivedMessage == pumaTO;
+        assert testTopic.equals(listener.receivedTopic);
+    }
+}
