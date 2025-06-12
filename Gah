@@ -1,0 +1,57 @@
+package com.bnpp.pb.common.clientdata.to;
+
+import org.junit.jupiter.api.Test;
+import javax.xml.bind.annotation.adapters.XmlAdapter;
+import java.util.Calendar;
+import java.util.GregorianCalendar;
+
+import static org.junit.jupiter.api.Assertions.*;
+
+class DateAdapterTest {
+
+    private final DateAdapter dateAdapter = new DateAdapter();
+
+    @Test
+    void unmarshal_validDateString_returnsCalendar() throws Exception {
+        String dateString = "2025-06-15";
+        Calendar result = dateAdapter.unmarshal(dateString);
+        
+        assertNotNull(result);
+        assertEquals(2025, result.get(Calendar.YEAR));
+        assertEquals(Calendar.JUNE, result.get(Calendar.MONTH));
+        assertEquals(15, result.get(Calendar.DAY_OF_MONTH));
+    }
+
+    @Test
+    void unmarshal_nullString_returnsNull() throws Exception {
+        assertNull(dateAdapter.unmarshal(null));
+    }
+
+    @Test
+    void unmarshal_emptyString_throwsException() {
+        assertThrows(IllegalArgumentException.class, () -> {
+            dateAdapter.unmarshal("");
+        });
+    }
+
+    @Test
+    void marshal_validCalendar_returnsString() throws Exception {
+        Calendar calendar = new GregorianCalendar(2025, Calendar.JUNE, 15);
+        String result = dateAdapter.marshal(calendar);
+        
+        assertNotNull(result);
+        assertTrue(result.contains("2025"));
+        assertTrue(result.contains("06"));
+        assertTrue(result.contains("15"));
+    }
+
+    @Test
+    void marshal_nullCalendar_returnsNull() throws Exception {
+        assertNull(dateAdapter.marshal(null));
+    }
+
+    @Test
+    void class_shouldExtendXmlAdapter() {
+        assertTrue(XmlAdapter.class.isAssignableFrom(DateAdapter.class));
+    }
+}
