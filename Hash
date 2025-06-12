@@ -1,0 +1,69 @@
+package com.bnpp.pb.common.clientdata.enums;
+
+import org.junit.Test;
+import static org.junit.Assert.*;
+
+public class FinancingGroupTypeTest {
+
+    @Test(timeout = 4000)
+    public void testEnumValuesExist() throws Throwable {
+        assertNotNull(FinancingGroupType.Simple);
+        assertNotNull(FinancingGroupType.COMPLEX);
+        assertEquals(2, FinancingGroupType.values().length);
+    }
+
+    @Test(timeout = 4000)
+    public void testGetTypeCode() throws Throwable {
+        assertEquals("Simple", FinancingGroupType.Simple.getTypeCode());
+        assertEquals("COMPLEX", FinancingGroupType.COMPLEX.getTypeCode());
+    }
+
+    @Test(timeout = 4000)
+    public void testGetDescr() throws Throwable {
+        assertEquals("Simple", FinancingGroupType.Simple.getDescr());
+        assertEquals("Complex", FinancingGroupType.COMPLEX.getDescr());
+    }
+
+    @Test(timeout = 4000)
+    public void testGetCodeValue() throws Throwable {
+        assertEquals("Simple", FinancingGroupType.Simple.getCodeValue());
+        assertEquals("COMPLEX", FinancingGroupType.COMPLEX.getCodeValue());
+    }
+
+    @Test(timeout = 4000)
+    public void testGetCodeDescription() throws Throwable {
+        assertEquals("Simple", FinancingGroupType.Simple.getCodeDescription());
+        assertEquals("Complex", FinancingGroupType.COMPLEX.getCodeDescription());
+    }
+
+    @Test(timeout = 4000)
+    public void testFindByTypeCode() throws Throwable {
+        assertEquals(FinancingGroupType.Simple, FinancingGroupType.findByTypeCode("Simple"));
+        assertEquals(FinancingGroupType.COMPLEX, FinancingGroupType.findByTypeCode("COMPLEX"));
+        assertNull(FinancingGroupType.findByTypeCode("INVALID"));
+    }
+
+    @Test(timeout = 4000)
+    public void testFindByDisplayValue() throws Throwable {
+        assertEquals(FinancingGroupType.Simple, FinancingGroupType.findByDisplayValue("Simple"));
+        assertEquals(FinancingGroupType.COMPLEX, FinancingGroupType.findByDisplayValue("Complex"));
+        assertNull(FinancingGroupType.findByDisplayValue("INVALID"));
+    }
+
+    @Test(timeout = 4000)
+    public void testKeyValuePairs() throws Throwable {
+        String[][] pairs = FinancingGroupType.keyValuePairs;
+        assertNotNull(pairs);
+        assertEquals(2, pairs.length);
+        assertEquals("Simple", pairs[0][0]);
+        assertEquals("Simple", pairs[0][1]);
+        assertEquals("COMPLEX", pairs[1][0]);
+        assertEquals("Complex", pairs[1][1]);
+    }
+
+    @Test(timeout = 4000)
+    public void testStaticMapsInitialization() throws Throwable {
+        assertEquals(FinancingGroupType.Simple, FinancingGroupType.findByTypeCode("Simple"));
+        assertEquals(FinancingGroupType.COMPLEX, FinancingGroupType.findByDisplayValue("Complex"));
+    }
+}
