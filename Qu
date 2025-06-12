@@ -1,0 +1,80 @@
+package com.bnpp.pb.common.clientdata.util;
+
+import org.apache.commons.collections.CollectionUtils;
+import org.junit.Test;
+import java.util.ArrayList;
+import java.util.Arrays;
+import java.util.List;
+import static org.junit.Assert.*;
+
+public class QueryInBatchTest {
+
+    // Test implementation of ListRun interface
+    private static class TestListRun<T, V> implements ListRun<T, V> {
+        private final List<T> queryResults;
+        
+        public TestListRun(List<T> queryResults) {
+            this.queryResults = queryResults;
+        }
+
+        @Override
+        public List<T> doQuery(List<V> input) {
+            return queryResults;
+        }
+    }
+
+    @Test(timeout = 4000)
+    public void testRun_WithEmptyInput() throws Throwable {
+        List<String> fetchList = new ArrayList<>();
+        TestListRun<String, String> query = new TestListRun<>(Arrays.asList("result1", "result2"));
+        
+        List<String> result = QueryInBatch.run(query, fetchList);
+        
+        assertNull(result);
+    }
+
+    @Test(timeout = 4000)
+    public void testRun_WithSingleBatch() throws Throwable {
+        List<String> fetchList = Arrays.asList("input1", "input2");
+        List<String> expectedResults = Arrays.asList("result1", "result2");
+        TestListRun<String, String> query = new TestListRun<>(expectedResults);
+        
+        List<String> result = QueryInBatch.run(query, fetchList);
+        
+        assertEquals(expectedResults, result);
+    }
+
+    @Test(timeout = 4000)
+    public void testRun_WithMultipleBatches() throws Throwable {
+        // Create a large list that will be split into batches
+        List<Integer> fetchList = new ArrayList<>();
+        for (int i = 0; i < 150; i++) {
+            fetchList.add(i);
+        }
+        
+        TestListRun<String, Integer> query = new TestListRun<>(Arrays.asList("result"));
+        
+        List<String> result = QueryInBatch.run(query, fetchList);
+        
+        assertNotNull(result);
+        assertTrue(result.size() > 1);
+    }
+
+    @Test(timeout = 4000)
+    public void testRun_WithNullQuery() throws Throwable {
+        List<String> fetchList = Arrays.asList("input1", "input2");
+        
+        List<String> result = QueryInBatch.run(null, fetchList);
+        
+        assertNull(result);
+    }
+
+    @Test(timeout = 4000)
+    public void testRun_WithNullFetchList() throws Throwable {
+        TestListRun<String, String> query = new TestListRun<>(Arrays.asList("result"));
+        
+        List<String> result = QueryInBatch.run(query, null);
+        
+        assertNull(result);
+    }
+}
