@@ -1,0 +1,71 @@
+package com.bnpp.pb.common.clientdata.lookup;
+
+import com.bnpp.pb.common.clientdata.marshaller.ClientDataMarshaller;
+import com.bnpp.pb.common.clientdata.to.PumaTO;
+import org.junit.jupiter.api.BeforeEach;
+import org.junit.jupiter.api.Test;
+import org.mockito.*;
+
+import static org.mockito.Mockito.*;
+
+public class ClientDataMessageListenerTest {
+
+    @Mock
+    private ClientDataMarshaller mockMarshaller;
+
+    @Mock
+    private PumaTO mockPumaTO;
+
+    @InjectMocks
+    private ClientDataMessageListenerImpl listener;
+
+    @Captor
+    private ArgumentCaptor<String> topicCaptor;
+
+    @Captor
+    private ArgumentCaptor<PumaTO> messageCaptor;
+
+    @BeforeEach
+    public void setUp() {
+        MockitoAnnotations.openMocks(this);
+        listener = spy(new ClientDataMessageListenerImpl());
+
+        // Mock ClientDataMarshaller behavior
+        doReturn(mockPumaTO).when(listener).unmarshal(anyString());
+    }
+
+    @Test
+    public void testOnMessage_StringDelegatesToPumaTO() {
+        String topic = "test-topic";
+        String inputMessage = "mock-json";
+
+        listener.onMessage(inputMessage, topic);
+
+        verify(listener, times(1)).onMessage(mockPumaTO, topic);
+    }
+
+    // Custom implementation to override abstract class for testing
+    private static class ClientDataMessageListenerImpl extends ClientDataMessageListener {
+
+        @Override
+        public void onMessage(PumaTO message, String topic) {
+            // Minimal implementation for test
+        }
+
+        // Override marshaller to inject mock
+        @Override
+        protected ClientDataMarshaller getMarshaller() {
+            return new ClientDataMarshaller() {
+                @Override
+                public PumaTO unmarshal(String message) {
+                    return mock(PumaTO.class);
+                }
+            };
+        }
+
+        // Optional: break out for mocking if needed
+        public PumaTO unmarshal(String message) {
+            return new ClientDataMarshaller().unmarshal(message);
+        }
+    }
+}
