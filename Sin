@@ -1,0 +1,40 @@
+package com.bnpp.pb.common.clientdata.intf;
+
+import com.bnpp.pb.common.clientdata.to.AbstractPartyTO;
+import org.junit.Test;
+import static org.junit.Assert.*;
+
+public class ISecurableTest {
+
+    // Test implementation of the abstract class
+    private static class TestSecurable extends ISecurable {
+        // No abstract methods to implement in this case
+    }
+
+    @Test(timeout = 4000)
+    public void testClassHierarchy() throws Throwable {
+        TestSecurable securable = new TestSecurable();
+        assertTrue("Should be instance of AbstractPartyTO", 
+                  securable instanceof AbstractPartyTO);
+        assertTrue("Should be instance of IGroup", 
+                  securable instanceof IGroup);
+    }
+
+    @Test(timeout = 4000)
+    public void testAbstractClassBehavior() throws Throwable {
+        // This test verifies the class is abstract through reflection
+        assertTrue(java.lang.reflect.Modifier.isAbstract(ISecurable.class.getModifiers()));
+    }
+
+    @Test(timeout = 4000)
+    public void testConcreteImplementationWorks() throws Throwable {
+        TestSecurable securable = new TestSecurable();
+        assertNotNull("Concrete implementation should work", securable);
+    }
+
+    @Test(timeout = 4000)
+    public void testInheritedMethods() throws Throwable {
+        TestSecurable securable = new TestSecurable();
+        assertNotNull("toString() should not return null", securable.toString());
+    }
+}
