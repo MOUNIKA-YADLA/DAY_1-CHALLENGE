@@ -1,0 +1,56 @@
+package com.bnpp.pb.common.clientdata.lookup.resource;
+
+import org.junit.Before;
+import org.junit.Test;
+import static org.junit.Assert.*;
+
+public class TryResourceLookupTest {
+
+    @Before
+    public void setUp() {
+        // Clear any existing properties that might interfere with tests
+        System.clearProperty("cache.config.location");
+        System.clearProperty("resource.lookup.factory.class");
+    }
+
+    @Test(timeout = 4000)
+    public void testMainMethodWithValidProperties() throws Throwable {
+        // Setup valid system properties before calling main
+        System.setProperty("cache.config.location", "test_threadre_lookup.xml");
+        System.setProperty("resource.lookup.factory.class", "com.bnpp.pb.common.core.security.resource.TestResourceLookupFactory");
+        
+        TryResourceLookup.main(new String[]{});
+        
+        // Verify properties were set correctly
+        assertNotNull(System.getProperty("cache.config.location"));
+        assertNotNull(System.getProperty("resource.lookup.factory.class"));
+    }
+
+    @Test(timeout = 4000, expected = NullPointerException.class)
+    public void testMainMethodWithMissingProperties() throws Throwable {
+        // Clear properties to test null case
+        System.clearProperty("cache.config.location");
+        System.clearProperty("resource.lookup.factory.class");
+        
+        TryResourceLookup.main(new String[]{});
+    }
+
+    @Test(timeout = 4000)
+    public void testResourceLookupProviderInitialization() throws Throwable {
+        // Setup required properties
+        System.setProperty("cache.config.location", "test_threadre_lookup.xml");
+        System.setProperty("resource.lookup.factory.class", "com.bnpp.pb.common.core.security.resource.TestResourceLookupFactory");
+        
+        TryResourceLookup lookup = new TryResourceLookup();
+        assertNotNull(lookup);
+    }
+
+    @Test(timeout = 4000, expected = ExceptionInInitializerError.class)
+    public void testResourceLookupProviderInitializationFailure() throws Throwable {
+        // Set invalid factory class to force initialization error
+        System.setProperty("cache.config.location", "test_threadre_lookup.xml");
+        System.setProperty("resource.lookup.factory.class", "invalid.class.Name");
+        
+        new TryResourceLookup();
+    }
+}
