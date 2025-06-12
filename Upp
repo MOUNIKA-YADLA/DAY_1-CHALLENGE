@@ -1,0 +1,109 @@
+package com.bmp.pb.common.clientdata.hookup;
+
+import com.bmp.pb.common.clientdata.intf.IApplicationBrief;
+import com.bmp.pb.common.clientdata.service.intf.UserManagerEntitlementService;
+import com.bmp.pb.common.clientdata.to.ManagerApplication;
+import com.bmp.pb.common.core.data.cache.Cache;
+import com.bmp.pb.common.core.data.cache.CacheFactory;
+import com.bmp.pb.common.log.Log;
+import org.junit.Before;
+import org.junit.Test;
+import org.mockito.Mock;
+import org.mockito.MockitoAnnotations;
+
+import java.util.Collections;
+import java.util.List;
+
+import static org.junit.Assert.*;
+import static org.mockito.Mockito.*;
+
+public class UserManagerApplicationProviderTest {
+
+    private UserManagerApplicationProvider provider;
+    
+    @Mock
+    private UserManagerEntitlementService userEntitlementService;
+    
+    @Mock
+    private Cache<String, List<IApplicationBrief>> applicationCache;
+    
+    @Mock
+    private ManagerApplication mockManagerApplication;
+    
+    @Mock
+    private List<IApplicationBrief> mockApplications;
+
+    @Before
+    public void setUp() throws Exception {
+        MockitoAnnotations.initMocks(this);
+        provider = new UserManagerApplicationProvider();
+        provider.setUserEntitlementService(userEntitlementService);
+        
+        // Mock the cache factory to return our mock cache
+        when(CacheFactory.createEntitleCache(anyString())).thenReturn(applicationCache);
+    }
+
+    @Test(timeout = 4000)
+    public void testConstructorInitializesCache() throws Throwable {
+        assertNotNull(provider.applicationCache);
+    }
+
+    @Test(timeout = 4000)
+    public void testGetManagerApplicationBuilder() throws Throwable {
+        // Setup
+        String testUser = "testUser";
+        when(userEntitlementService.getManagerApplicationBuilder(testUser))
+            .thenReturn(mockManagerApplication);
+        
+        // Execute
+        ManagerApplication result = provider.getManagerApplicationBuilder(testUser);
+        
+        // Verify
+        assertNotNull(result);
+        assertEquals(mockManagerApplication, result);
+        verify(userEntitlementService).getManagerApplicationBuilder(testUser);
+    }
+
+    @Test(timeout = 4000)
+    public void testGetManagerApplicationBuilderWithCache() throws Throwable {
+        // Setup
+        String testUser = "testUser";
+        when(applicationCache.get(testUser)).thenReturn(mockApplications);
+        when(userEntitlementService.getManagerApplicationBuilder(testUser))
+            .thenReturn(mockManagerApplication);
+        
+        // Execute
+        ManagerApplication result = provider.getManagerApplicationBuilder(testUser);
+        
+        // Verify
+        assertNotNull(result);
+        verify(applicationCache).get(testUser);
+    }
+
+    @Test(timeout = 4000)
+    public void testSetUserEntitlementService() throws Throwable {
+        // Setup
+        UserManagerEntitlementService newService = mock(UserManagerEntitlementService.class);
+        
+        // Execute
+        provider.setUserEntitlementService(newService);
+        
+        // Verify
+        assertSame(newService, provider.userEntitlementService);
+    }
+
+    @Test(timeout = 4000)
+    public void testCacheIntegration() throws Throwable {
+        // Setup
+        String testUser = "testUser";
+        List<IApplicationBrief> expectedApps = Collections.singletonList(mock(IApplicationBrief.class));
+        when(userEntitlementService.getManagerApplicationBuilder(testUser))
+            .thenReturn(mockManagerApplication);
+        
+        // Execute
+        provider.getManagerApplicationBuilder(testUser);
+        
+        // Verify cache interaction
+        verify(applicationCache, atLeastOnce()).get(testUser);
+    }
+}
