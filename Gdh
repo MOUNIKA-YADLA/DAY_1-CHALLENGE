@@ -1,0 +1,101 @@
+package com.bnpp.pb.common.clientdata.emms;
+
+import org.junit.Test;
+import java.util.List;
+import static org.junit.Assert.*;
+
+public class DailyStatementTypeTest {
+
+    @Test(timeout = 4000)
+    public void testEnumValuesExist() throws Throwable {
+        assertNotNull(DailyStatementType.E);
+        assertNotNull(DailyStatementType.N);
+        assertEquals(2, DailyStatementType.values().length);
+    }
+
+    @Test(timeout = 4000)
+    public void testGetCode() throws Throwable {
+        assertEquals("E", DailyStatementType.E.getCode());
+        assertEquals("NotRequired", DailyStatementType.N.getCode());
+    }
+
+    @Test(timeout = 4000)
+    public void testGetCodeValue() throws Throwable {
+        assertEquals("E", DailyStatementType.E.getCodeValue());
+        assertEquals("NotRequired", DailyStatementType.N.getCodeValue());
+    }
+
+    @Test(timeout = 4000)
+    public void testGetName() throws Throwable {
+        assertEquals("E", DailyStatementType.E.getName());
+        assertEquals("Not Required", DailyStatementType.N.getName());
+    }
+
+    @Test(timeout = 4000)
+    public void testGetCodeDescription() throws Throwable {
+        assertEquals("E", DailyStatementType.E.getCodeDescription());
+        assertEquals("Not Required", DailyStatementType.N.getCodeDescription());
+    }
+
+    @Test(timeout = 4000)
+    public void testToString() throws Throwable {
+        assertEquals("E", DailyStatementType.E.toString());
+        assertEquals("NotRequired", DailyStatementType.N.toString());
+    }
+
+    @Test(timeout = 4000)
+    public void testGetByCode() throws Throwable {
+        assertEquals(DailyStatementType.E, DailyStatementType.getByCode("E"));
+        assertEquals(DailyStatementType.N, DailyStatementType.getByCode("NotRequired"));
+        assertNull(DailyStatementType.getByCode("Invalid"));
+    }
+
+    @Test(timeout = 4000)
+    public void testGetByName() throws Throwable {
+        assertEquals(DailyStatementType.E, DailyStatementType.getByName("E"));
+        assertEquals(DailyStatementType.N, DailyStatementType.getByName("Not Required"));
+        assertNull(DailyStatementType.getByName("Invalid"));
+    }
+
+    @Test(timeout = 4000)
+    public void testFindByCode() throws Throwable {
+        assertEquals(DailyStatementType.E, DailyStatementType.findByCode("E"));
+        assertEquals(DailyStatementType.N, DailyStatementType.findByCode("NotRequired"));
+        assertNull(DailyStatementType.findByCode("Invalid"));
+    }
+
+    @Test(timeout = 4000)
+    public void testFindByDisplayValue() throws Throwable {
+        assertEquals(DailyStatementType.E, DailyStatementType.findByDisplayValue("E"));
+        assertEquals(DailyStatementType.N, DailyStatementType.findByDisplayValue("Not Required"));
+        assertNull(DailyStatementType.findByDisplayValue("Invalid"));
+    }
+
+    @Test(timeout = 4000)
+    public void testGetCustomDailyStateTypes() throws Throwable {
+        List<DailyStatementType> customTypes = DailyStatementType.getCustomDailyStateTypes();
+        assertEquals(2, customTypes.size());
+        assertTrue(customTypes.contains(DailyStatementType.E));
+        assertTrue(customTypes.contains(DailyStatementType.N));
+    }
+
+    @Test(timeout = 4000)
+    public void testKeyValuePairs() throws Throwable {
+        String[][] pairs = DailyStatementType.keyValuePairs;
+        assertNotNull(pairs);
+        assertEquals(2, pairs.length);
+        assertEquals("E", pairs[0][0]);
+        assertEquals("E", pairs[0][1]);
+        assertEquals("NotRequired", pairs[1][0]);
+        assertEquals("Not Required", pairs[1][1]);
+    }
+
+    @Test(timeout = 4000)
+    public void testGetSortedValues() throws Throwable {
+        List<IEnumExtension> sortedValues = DailyStatementType.getSortedValues();
+        assertNotNull(sortedValues);
+        assertEquals(2, sortedValues.size());
+        assertTrue(sortedValues.contains(DailyStatementType.E));
+        assertTrue(sortedValues.contains(DailyStatementType.N));
+    }
+}
