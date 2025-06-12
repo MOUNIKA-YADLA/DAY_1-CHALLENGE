@@ -1,0 +1,39 @@
+package com.bnpp.pb.common.clientdata.enums;
+
+import org.junit.Test;
+import static org.junit.Assert.*;
+
+public class CounterpartyEligibilitySourceTest {
+
+    @Test(timeout = 4000)
+    public void testEnumValuesExist() throws Throwable {
+        assertNotNull(CounterpartyEligibilitySource.TRADE_ELIGIBILITY);
+        assertNotNull(CounterpartyEligibilitySource.COUNTERPARTY_ELIGIBILITY);
+        assertEquals(2, CounterpartyEligibilitySource.values().length);
+    }
+
+    @Test(timeout = 4000)
+    public void testEnumNames() throws Throwable {
+        assertEquals("TRADE_ELIGIBILITY", CounterpartyEligibilitySource.TRADE_ELIGIBILITY.name());
+        assertEquals("COUNTERPARTY_ELIGIBILITY", CounterpartyEligibilitySource.COUNTERPARTY_ELIGIBILITY.name());
+    }
+
+    @Test(timeout = 4000)
+    public void testToString() throws Throwable {
+        assertEquals("TRADE_ELIGIBILITY", CounterpartyEligibilitySource.TRADE_ELIGIBILITY.toString());
+        assertEquals("COUNTERPARTY_ELIGIBILITY", CounterpartyEligibilitySource.COUNTERPARTY_ELIGIBILITY.toString());
+    }
+
+    @Test(timeout = 4000)
+    public void testValueOf() throws Throwable {
+        assertEquals(CounterpartyEligibilitySource.TRADE_ELIGIBILITY, 
+                   CounterpartyEligibilitySource.valueOf("TRADE_ELIGIBILITY"));
+        assertEquals(CounterpartyEligibilitySource.COUNTERPARTY_ELIGIBILITY, 
+                   CounterpartyEligibilitySource.valueOf("COUNTERPARTY_ELIGIBILITY"));
+    }
+
+    @Test(expected = IllegalArgumentException.class, timeout = 4000)
+    public void testValueOfInvalid() throws Throwable {
+        CounterpartyEligibilitySource.valueOf("INVALID_VALUE");
+    }
+}
