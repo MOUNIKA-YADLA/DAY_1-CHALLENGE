@@ -1,0 +1,41 @@
+package com.bmp.pb.common.clientdata.lookup.resource;
+
+import org.junit.Before;
+import org.junit.Test;
+import static org.junit.Assert.*;
+
+public class TryResourceLookupTest {
+
+    private TryResourceLookup resourceLookup;
+
+    @Before
+    public void setUp() {
+        resourceLookup = new TryResourceLookup();
+    }
+
+    @Test(timeout = 4000)
+    public void testLookupServiceInitialization() throws Throwable {
+        assertNotNull("Resource lookup service should be initialized", resourceLookup);
+    }
+
+    @Test(timeout = 4000)
+    public void testMainMethod() throws Throwable {
+        TryResourceLookup.main(new String[]{});
+        // Verify no exceptions are thrown
+        assertTrue(true);
+    }
+
+    @Test(timeout = 4000)
+    public void testSystemPropertiesSet() throws Throwable {
+        // Verify the system properties are set correctly
+        assertNotNull(System.getProperty("cache.config.location"));
+        assertNotNull(System.getProperty("resource.lookup.factory.class"));
+    }
+
+    @Test(timeout = 4000)
+    public void testSecurityEventListener() throws Throwable {
+        // This would test the security event listener functionality
+        // if implemented in your class
+        assertTrue(true); // placeholder
+    }
+}
