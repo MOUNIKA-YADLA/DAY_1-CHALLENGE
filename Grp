@@ -1,0 +1,47 @@
+package com.bnpp.pb.common.clientdata.intf;
+
+import com.bnpp.pb.common.clientdata.to.AbstractPartyTO;
+import org.junit.Test;
+import java.lang.reflect.Modifier;
+import static org.junit.Assert.*;
+
+public class ISecurableGroupTest {
+
+    // Test implementation of the abstract class
+    private static class TestSecurableGroup extends ISecurableGroup {
+        // No abstract methods to implement in base class
+    }
+
+    @Test(timeout = 4000)
+    public void testClassIsAbstract() throws Throwable {
+        assertTrue("Class should be abstract",
+                 Modifier.isAbstract(ISecurableGroup.class.getModifiers()));
+    }
+
+    @Test(timeout = 4000)
+    public void testClassHierarchy() throws Throwable {
+        TestSecurableGroup securableGroup = new TestSecurableGroup();
+        assertTrue("Should extend AbstractPartyTO",
+                  securableGroup instanceof AbstractPartyTO);
+        assertTrue("Should implement IGroup",
+                  securableGroup instanceof IGroup);
+    }
+
+    @Test(timeout = 4000)
+    public void testConcreteImplementation() throws Throwable {
+        TestSecurableGroup securableGroup = new TestSecurableGroup();
+        assertNotNull("Concrete implementation should work", securableGroup);
+    }
+
+    @Test(timeout = 4000)
+    public void testInheritedMethods() throws Throwable {
+        TestSecurableGroup securableGroup = new TestSecurableGroup();
+        
+        // Test methods inherited from AbstractPartyTO
+        assertNotNull("toString() should not be null", 
+                     securableGroup.toString());
+        
+        // Add more assertions for other methods from AbstractPartyTO
+        // as needed based on your implementation
+    }
+}
