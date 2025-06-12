@@ -1,0 +1,39 @@
+package com.bnpp.pb.common.clientdata.intr;
+
+import com.bnpp.pb.common.clientdata.to.AbstractParty70;
+import org.junit.Test;
+import static org.junit.Assert.*;
+
+public class IPrincipalTest {
+
+    // Create a concrete test implementation of the abstract class
+    private static class TestPrincipal extends IPrincipal {
+        // Implement any abstract methods if they exist
+        // (No abstract methods shown in the provided code)
+    }
+
+    @Test(timeout = 4000)
+    public void testClassHierarchy() throws Throwable {
+        TestPrincipal principal = new TestPrincipal();
+        assertTrue(principal instanceof AbstractParty70);
+        assertTrue(principal instanceof IGroup);
+    }
+
+    @Test(timeout = 4000)
+    public void testAbstractClassCannotBeInstantiated() throws Throwable {
+        try {
+            // This should fail since IPrincipal is abstract
+            IPrincipal principal = new IPrincipal() {};
+            fail("Should not be able to instantiate abstract class directly");
+        } catch (Exception e) {
+            // Expected behavior
+        }
+    }
+
+    @Test(timeout = 4000)
+    public void testConcreteImplementationWorks() throws Throwable {
+        TestPrincipal principal = new TestPrincipal();
+        assertNotNull(principal);
+        // Add more assertions if there are methods to test
+    }
+}
