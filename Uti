@@ -1,0 +1,70 @@
+package com.bnpp.pb.common.clientdata.util;
+
+import com.bnpp.pb.common.clientdata.enums.RegionCodes;
+import com.bnpp.pb.common.clientdata.to.YesNoType;
+import org.junit.jupiter.api.Test;
+import static org.junit.jupiter.api.Assertions.*;
+
+class ConverterUtilTest {
+
+    // Test cases for convert2Boolean()
+    @Test
+    void convert2Boolean_Yes_ReturnsTrue() {
+        assertEquals(Boolean.TRUE, ConverterUtil.convert2Boolean(YesNoType.Yes));
+    }
+
+    @Test
+    void convert2Boolean_No_ReturnsFalse() {
+        assertEquals(Boolean.FALSE, ConverterUtil.convert2Boolean(YesNoType.No));
+    }
+
+    @Test
+    void convert2Boolean_Null_ReturnsNull() {
+        assertNull(ConverterUtil.convert2Boolean(null));
+    }
+
+    // Test cases for convertTZ2Region()
+    @Test
+    void convertTZ2Region_ValidTimeZone_ReturnsRegion() {
+        // Setup test timezone mapping
+        RegionTimeZoneMapping.testMap.put("Test/Zone", RegionCodes.EU);
+        
+        assertEquals(RegionCodes.EU, ConverterUtil.convertTZ2Region("Test/Zone"));
+        RegionTimeZoneMapping.testMap.clear(); // Cleanup
+    }
+
+    @Test
+    void convertTZ2Region_NullTimeZone_ReturnsNull() {
+        assertNull(ConverterUtil.convertTZ2Region(null));
+    }
+
+    @Test
+    void convertTZ2Region_EmptyTimeZone_ReturnsNull() {
+        assertNull(ConverterUtil.convertTZ2Region(""));
+    }
+
+    @Test
+    void convertTZ2Region_UnknownTimeZone_ReturnsNull() {
+        assertNull(ConverterUtil.convertTZ2Region("Unknown/Zone"));
+    }
+}
+
+
+
+
+package com.bnpp.pb.common.clientdata.util;
+
+import com.bnpp.pb.common.clientdata.enums.RegionCodes;
+import java.util.HashMap;
+import java.util.Map;
+
+public class RegionTimeZoneMapping {
+    public static final Map<String, RegionCodes> testMap = new HashMap<>();
+    
+    public static RegionCodes getRegionByTimeZone(String timeZone) {
+        return testMap.get(timeZone);
+    }
+}
+
+
+
