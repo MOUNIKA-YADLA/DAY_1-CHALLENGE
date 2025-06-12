@@ -1,0 +1,58 @@
+package com.bnpp.pb.common.clientdata.enums;
+
+import org.junit.Test;
+import java.util.List;
+import static org.junit.Assert.*;
+
+public class ClientOnboardingInfoStatusTest {
+
+    @Test(timeout = 4000)
+    public void testEnumValuesExist() throws Throwable {
+        assertNotNull(ClientOnboardingInfoStatus.A);
+        assertNotNull(ClientOnboardingInfoStatus.I);
+        assertEquals(2, ClientOnboardingInfoStatus.values().length);
+    }
+
+    @Test(timeout = 4000)
+    public void testGetCode() throws Throwable {
+        assertEquals("A", ClientOnboardingInfoStatus.A.getCode());
+        assertEquals("I", ClientOnboardingInfoStatus.I.getCode());
+    }
+
+    @Test(timeout = 4000)
+    public void testGetName() throws Throwable {
+        assertEquals("Active", ClientOnboardingInfoStatus.A.getName());
+        assertEquals("Inactive", ClientOnboardingInfoStatus.I.getName());
+    }
+
+    @Test(timeout = 4000)
+    public void testToString() throws Throwable {
+        assertEquals("A", ClientOnboardingInfoStatus.A.toString());
+        assertEquals("I", ClientOnboardingInfoStatus.I.toString());
+    }
+
+    @Test(timeout = 4000)
+    public void testGetByCode() throws Throwable {
+        assertEquals(ClientOnboardingInfoStatus.A, ClientOnboardingInfoStatus.getByCode("A"));
+        assertEquals(ClientOnboardingInfoStatus.I, ClientOnboardingInfoStatus.getByCode("I"));
+        assertNull(ClientOnboardingInfoStatus.getByCode("INVALID"));
+    }
+
+    @Test(timeout = 4000)
+    public void testFindByCode() throws Throwable {
+        assertEquals(ClientOnboardingInfoStatus.A, ClientOnboardingInfoStatus.findByCode("A"));
+        assertEquals(ClientOnboardingInfoStatus.I, ClientOnboardingInfoStatus.findByCode("I"));
+        assertNull(ClientOnboardingInfoStatus.findByCode("INVALID"));
+    }
+
+    @Test(timeout = 4000)
+    public void testKeyValuePairs() throws Throwable {
+        String[][] pairs = ClientOnboardingInfoStatus.keyValuePairs;
+        assertNotNull(pairs);
+        assertEquals(2, pairs.length);
+        assertEquals("A", pairs[0][0]);
+        assertEquals("Active", pairs[0][1]);
+        assertEquals("I", pairs[1][0]);
+        assertEquals("Inactive", pairs[1][1]);
+    }
+}
