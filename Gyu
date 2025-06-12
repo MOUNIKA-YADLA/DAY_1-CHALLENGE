@@ -1,0 +1,75 @@
+package com.bnpp.pb.common.clientdata.util;
+
+import com.bnpp.pb.common.clientdata.enums.CounterpartyEligibilitySource;
+import com.bnpp.pb.common.clientdata.enums.TradingEligibilitySourcesystem;
+import com.bnpp.pb.common.clientdata.to.CounterpartyEligibilityInputByParty;
+import org.junit.jupiter.api.Test;
+
+import java.util.Arrays;
+import java.util.Collections;
+import java.util.List;
+
+import static org.junit.jupiter.api.Assertions.assertEquals;
+
+class CacheUtilTest {
+
+    @Test
+    void getTrustCacheKey_withMethodNameAndPartyCodes() {
+        // Arrange
+        String methodName = "testMethod";
+        CounterpartyEligibilityInputByParty input = new TestCounterpartyEligibilityInputByParty(
+            Arrays.asList("CODE1", "CODE2"), 
+            null
+        );
+
+        // Act
+        String result = CacheUtil.getTrustCacheKey(methodName, input, null);
+
+        // Assert
+        assertEquals("testMethodCODE1.CODE2", result);
+    }
+
+    // Add other test methods here following the same pattern...
+
+    @Test
+    void getTrustCacheKey_withAllComponents() {
+        // Arrange
+        String methodName = "testMethod";
+        CounterpartyEligibilityInputByParty input = new TestCounterpartyEligibilityInputByParty(
+            Arrays.asList("CODE1", "CODE2"), 
+            TradingEligibilitySourcesystem.valueOf("SYSTEM1") // Use actual enum value
+        );
+        List<CounterpartyEligibilitySource> sources = Arrays.asList(
+            CounterpartyEligibilitySource.valueOf("SOURCE1"), // Use actual enum value
+            CounterpartyEligibilitySource.valueOf("SOURCE2") // Use actual enum value
+        );
+
+        // Act
+        String result = CacheUtil.getTrustCacheKey(methodName, input, sources);
+
+        // Assert
+        assertEquals("testMethodCODE1.CODE2SYSTEM1SOURCE1SOURCE2", result);
+    }
+
+    // Test implementation of CounterpartyEligibilityInputByParty
+    private static class TestCounterpartyEligibilityInputByParty implements CounterpartyEligibilityInputByParty {
+        private final List<String> partyCodes;
+        private final TradingEligibilitySourcesystem tradingEligibilitySourcesystem;
+
+        public TestCounterpartyEligibilityInputByParty(List<String> partyCodes, 
+                                                      TradingEligibilitySourcesystem tradingEligibilitySourcesystem) {
+            this.partyCodes = partyCodes;
+            this.tradingEligibilitySourcesystem = tradingEligibilitySourcesystem;
+        }
+
+        @Override
+        public List<String> getPartyCodes() {
+            return partyCodes;
+        }
+
+        @Override
+        public TradingEligibilitySourcesystem getTradingEligibilitySourcesystem() {
+            return tradingEligibilitySourcesystem;
+        }
+    }
+}
