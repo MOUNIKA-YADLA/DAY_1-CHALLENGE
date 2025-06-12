@@ -1,0 +1,72 @@
+package com.bnpp.pb.common.clientdata.lookup;
+
+import com.bnpp.pb.common.clientdata.enums.PartyType;
+import com.bnpp.pb.common.clientdata.intf.*;
+import com.bnpp.pb.common.clientdata.to.Manager;
+import com.bnpp.pb.common.clientdata.to.PartyBrief;
+import com.bnpp.pb.common.core.security.SecurityEngine;
+import com.bnpp.pb.common.core.security.spring.UserDetailsServiceImpl;
+
+import org.junit.Before;
+import org.junit.Test;
+
+import java.util.*;
+
+import static org.mockito.Mockito.*;
+
+public class ClientDataLoaderTest {
+
+    private ClientDataLoader clientDataLoader;
+    private ClientMasterLookupService mockLookupService;
+    private ISite mockSite;
+    private IHub mockHub;
+    private IAccountExec mockExec;
+    private IManagerBrief mockManager;
+    private Manager mockManagerObj;
+    private PartyBrief mockPartyBrief;
+    private PartyBrief childBrief;
+
+    @Before
+    public void setUp() {
+        clientDataLoader = new ClientDataLoader();
+        mockLookupService = mock(ClientMasterLookupService.class);
+        mockSite = mock(ISite.class);
+        mockHub = mock(IHub.class);
+        mockExec = mock(IAccountExec.class);
+        mockManager = mock(IManagerBrief.class);
+        mockManagerObj = mock(Manager.class);
+        mockPartyBrief = mock(PartyBrief.class);
+        childBrief = mock(PartyBrief.class);
+
+        clientDataLoader.setClientMasterService(mockLookupService);
+    }
+
+    @Test
+    public void testCall() throws Exception {
+        List<ISite> mockSiteList = Arrays.asList(mockSite);
+        when(mockLookupService.getAllSiteHubHierarchy(any())).thenReturn(mockSiteList);
+        when(mockSite.getHubs()).thenReturn(Arrays.asList(mockHub));
+        when(mockHub.getAccountReps()).thenReturn(Arrays.asList(mockExec));
+
+        when(mockExec.getCode()).thenReturn("repCode");
+        when(mockExec.getManagers()).thenReturn(Arrays.asList(mockManager));
+        when(mockManager.getPartyId()).thenReturn(123L);
+        when(mockSite.getPartyId()).thenReturn(1L);
+        when(mockHub.getPartyId()).thenReturn(2L);
+        when(mockLookupService.lookupManagersByPartyIds(anyList(), any())).thenReturn(Arrays.asList(mockManagerObj));
+
+        when(mockManagerObj.getReportingHierarchy()).thenReturn(Arrays.asList(mockPartyBrief));
+        when(mockPartyBrief.getType()).thenReturn(PartyType.SUBMANAGER);
+        when(mockPartyBrief.getPartyId()).thenReturn(456L);
+        when(mockPartyBrief.getChildren()).thenReturn(Arrays.asList(childBrief));
+        when(childBrief.getPartyId()).thenReturn(789L);
+
+        clientDataLoader.call();
+    }
+
+    @Test
+    public void testLoadUserStaticMethod() {
+        // Static method — best-effort test just for invocation coverage
+        ClientDataLoader.loadUser("mockUser");
+    }
+}
