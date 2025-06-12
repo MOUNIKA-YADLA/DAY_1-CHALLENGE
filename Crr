@@ -1,0 +1,104 @@
+package com.bnpp.pb.common.clientdata.enums;
+
+import java.util.List;
+import static org.junit.Assert.*;
+
+public class ClientTypeAccountTest {
+
+    @Test(timeout = 4000)
+    public void testEnumValuesExist() throws Throwable {
+        // Verify all enum values exist
+        assertNotNull(ClientTypeAccount.CAS);
+        assertNotNull(ClientTypeAccount.CASGSA);
+        assertNotNull(ClientTypeAccount.CUS);
+        assertNotNull(ClientTypeAccount.CUSGSA);
+        assertEquals(4, ClientTypeAccount.values().length);
+    }
+
+    @Test(timeout = 4000)
+    public void testGetCode() throws Throwable {
+        assertEquals("CAS", ClientTypeAccount.CAS.getCode());
+        assertEquals("CAS-GSA", ClientTypeAccount.CASGSA.getCode());
+        assertEquals("CUS", ClientTypeAccount.CUS.getCode());
+        assertEquals("CUS-GSA", ClientTypeAccount.CUSGSA.getCode());
+    }
+
+    @Test(timeout = 4000)
+    public void testGetCodeValue() throws Throwable {
+        assertEquals("CAS", ClientTypeAccount.CAS.getCodeValue());
+        assertEquals("CAS-GSA", ClientTypeAccount.CASGSA.getCodeValue());
+    }
+
+    @Test(timeout = 4000)
+    public void testGetName() throws Throwable {
+        assertEquals("CAS", ClientTypeAccount.CAS.getName());
+        assertEquals("CAS-GSA", ClientTypeAccount.CASGSA.getName());
+    }
+
+    @Test(timeout = 4000)
+    public void testGetCodeDescription() throws Throwable {
+        assertEquals("CAS", ClientTypeAccount.CAS.getCodeDescription());
+        assertEquals("CAS-GSA", ClientTypeAccount.CASGSA.getCodeDescription());
+    }
+
+    @Test(timeout = 4000)
+    public void testToString() throws Throwable {
+        assertEquals("CAS", ClientTypeAccount.CAS.toString());
+        assertEquals("CUS-GSA", ClientTypeAccount.CUSGSA.toString());
+    }
+
+    @Test(timeout = 4000)
+    public void testGetByCode() throws Throwable {
+        assertEquals(ClientTypeAccount.CAS, ClientTypeAccount.getByCode("CAS"));
+        assertEquals(ClientTypeAccount.CUSGSA, ClientTypeAccount.getByCode("CUS-GSA"));
+        assertNull(ClientTypeAccount.getByCode("INVALID"));
+    }
+
+    @Test(timeout = 4000)
+    public void testGetByName() throws Throwable {
+        assertEquals(ClientTypeAccount.CAS, ClientTypeAccount.getByName("CAS"));
+        assertEquals(ClientTypeAccount.CUSGSA, ClientTypeAccount.getByName("CUS-GSA"));
+        assertNull(ClientTypeAccount.getByName("INVALID"));
+    }
+
+    @Test(timeout = 4000)
+    public void testFindByCode() throws Throwable {
+        assertEquals(ClientTypeAccount.CAS, ClientTypeAccount.findByCode("CAS"));
+        assertEquals(ClientTypeAccount.CUS, ClientTypeAccount.findByCode("CUS"));
+        assertNull(ClientTypeAccount.findByCode("INVALID"));
+    }
+
+    @Test(timeout = 4000)
+    public void testFindByDisplayValue() throws Throwable {
+        assertEquals(ClientTypeAccount.CAS, ClientTypeAccount.findByDisplayValue("CAS"));
+        assertEquals(ClientTypeAccount.CUSGSA, ClientTypeAccount.findByDisplayValue("CUS-GSA"));
+        assertNull(ClientTypeAccount.findByDisplayValue("INVALID"));
+    }
+
+    @Test(timeout = 4000)
+    public void testGetCustomClientTypes() throws Throwable {
+        List<ClientTypeAccount> customTypes = ClientTypeAccount.getCustomClientTypes();
+        assertEquals(2, customTypes.size()); // Assuming CUS and CUSGSA are custom types
+        assertTrue(customTypes.contains(ClientTypeAccount.CUS));
+        assertTrue(customTypes.contains(ClientTypeAccount.CUSGSA));
+    }
+
+    @Test(timeout = 4000)
+    public void testKeyValuePairs() throws Throwable {
+        String[][] pairs = ClientTypeAccount.keyValuePairs;
+        assertNotNull(pairs);
+        assertEquals(4, pairs.length);
+        assertEquals("CAS", pairs[0][0]);
+        assertEquals("CAS-GSA", pairs[1][0]);
+        assertEquals("CUS-GSA", pairs[3][0]);
+    }
+
+    @Test(timeout = 4000)
+    public void testGetSortedValues() throws Throwable {
+        List<EnumExtension> sortedValues = ClientTypeAccount.getSortedValues();
+        assertNotNull(sortedValues);
+        assertEquals(4, sortedValues.size());
+        assertTrue(sortedValues.contains(ClientTypeAccount.CAS));
+        assertTrue(sortedValues.contains(ClientTypeAccount.CUSGSA));
+    }
+}
