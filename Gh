@@ -1,0 +1,48 @@
+package com.bnpp.pb.common.clientdata.util;
+
+import com.bnpp.pb.common.clientdata.enums.RegionCodes;
+import com.bnpp.pb.common.clientdata.to.YesNoType;
+import org.junit.jupiter.api.Test;
+import static org.junit.jupiter.api.Assertions.*;
+
+class ConverterUtilTest {
+
+    // Tests for convert2Boolean()
+    @Test
+    void convert2Boolean_withYes_returnsTrue() {
+        assertEquals(Boolean.TRUE, ConverterUtil.convert2Boolean(YesNoType.Yes));
+    }
+
+    @Test
+    void convert2Boolean_withNo_returnsFalse() {
+        assertEquals(Boolean.FALSE, ConverterUtil.convert2Boolean(YesNoType.No));
+    }
+
+    @Test
+    void convert2Boolean_withNull_returnsNull() {
+        assertNull(ConverterUtil.convert2Boolean(null));
+    }
+
+    // Tests for convertTZ2Region()
+    @Test
+    void convertTZ2Region_withNull_returnsNull() {
+        assertNull(ConverterUtil.convertTZ2Region(null));
+    }
+
+    @Test
+    void convertTZ2Region_withEmptyString_returnsNull() {
+        assertNull(ConverterUtil.convertTZ2Region(""));
+    }
+
+    @Test
+    void convertTZ2Region_withValidTimeZone_returnsRegion() {
+        // This assumes RegionTimeZoneMapping has some default mappings
+        // If you know specific valid timezone strings, use them here
+        assertDoesNotThrow(() -> ConverterUtil.convertTZ2Region("Europe/Paris"));
+    }
+
+    @Test
+    void convertTZ2Region_withInvalidTimeZone_returnsNull() {
+        assertNull(ConverterUtil.convertTZ2Region("Invalid/Timezone"));
+    }
+}
