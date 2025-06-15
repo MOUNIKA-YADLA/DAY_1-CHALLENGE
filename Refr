@@ -1,0 +1,41 @@
+package com.bnpp.pb.common.clientdata.lookup;
+
+import com.bnpp.pb.common.clientdata.service.intf.IUserEntitlementsService;
+import com.bnpp.pb.common.clientdata.to.ManagerEntitledApplication;
+
+import org.junit.Before;
+import org.junit.Test;
+
+import static org.junit.Assert.*;
+import java.util.*;
+  
+public class UserManagerApplicationProviderTest {
+
+    private UserManagerApplicationProvider provider;
+
+    @Before
+    public void setUp() {
+        provider = new UserManagerApplicationProvider();
+
+        // Mocking IUserEntitlementsService manually
+        IUserEntitlementsService mockService = new IUserEntitlementsService() {
+            @Override
+            public List<ManagerEntitledApplication> getManagersAndApplicationByUser(String userName) {
+                List<ManagerEntitledApplication> list = new ArrayList<>();
+                ManagerEntitledApplication application = new ManagerEntitledApplication();
+                // set properties if needed
+                list.add(application);
+                return list;
+            }
+        };
+        provider.setUserEntitlementsService(mockService);
+    }
+
+    @Test
+    public void getManagersAndApplicationByUser_shouldNotBeEmpty() {
+        List<ManagerEntitledApplication> result = provider.getManagersAndApplicationByUser("testUser");
+
+        assertNotNull(result);
+        assertFalse(result.isEmpty()); // or assertEquals(1, result.size()) if you know
+    }
+}
