@@ -1,0 +1,89 @@
+package com.bnpp.pb.puma.rest.client;
+
+import static org.junit.Assert.assertNotNull;
+
+import java.util.*;
+import org.junit.Test;
+
+public class ClientMasterLookupService_CTest {
+
+    @Test
+    public void deleteClientReportDefinitionByFileKey_shouldNotBeNull() {
+        ClientMasterLookupService_C service = new ClientMasterLookupService_C(null);
+        ClientReportDefinition result = service.deleteClientReportDefinitionByFileKey("fileKey");
+
+        assertNotNull(result);
+    }
+
+    @Test
+    public void deleteReportSubscription_shouldNotBeNull() {
+        ClientMasterLookupService_C service = new ClientMasterLookupService_C(null);
+        ReportSubscription dummy = new ReportSubscription();
+
+        ReportSubscription result = service.deleteReportSubscription(dummy);
+
+        assertNotNull(result);
+    }
+
+    @Test
+    public void deleteReportSubscriptionList_shouldNotBeNullForSingleList() {
+        ClientMasterLookupService_C service = new ClientMasterLookupService_C(null);
+        ReportSubscription dummy = new ReportSubscription();
+
+        List<ReportSubscription> result = service.deleteReportSubscriptionList(Arrays.asList(dummy));
+
+        assertNotNull(result);
+    }
+
+    @Test
+    public void deleteReportSubscriptionList_shouldNotBeNullForListWithExchange() {
+        ClientMasterLookupService_C service = new ClientMasterLookupService_C(null);
+        ReportSubscription dummy = new ReportSubscription();
+
+        List<ReportSubscription> result = service.deleteReportSubscriptionList(Arrays.asList(dummy));
+
+        assertNotNull(result);
+    }
+
+    @Test
+    public void findActionAllowedByRuleCriteria_shouldNotBeNull() {
+        ClientMasterLookupService_C service = new ClientMasterLookupService_C(null);
+        DepartmentActionRuleCriteria criteria = new DepartmentActionRuleCriteria();
+
+        DepartmentActionRule result = service.findActionAllowedByRuleCriteria(criteria, new HashMap<>());
+        assertNotNull(result);
+    }
+
+    @Test
+    public void findActionAllowedByRuleCriteriaList_shouldNotBeNull() {
+        ClientMasterLookupService_C service = new ClientMasterLookupService_C(null);
+        List<DepartmentActionRuleCriteria> criteriaList = Collections.singletonList(new DepartmentActionRuleCriteria());
+
+        List<DepartmentActionRule> result = service.findActionAllowedByRuleCriteriaList(new HashMap<>(), criteriaList);
+        assertNotNull(result);
+    }
+
+    @Test
+    public void findMarketCapSchemesByMgrCode_shouldNotBeNull() {
+        ClientMasterLookupService_C service = new ClientMasterLookupService_C(null);
+        List<MarketCapSchemeTO> result = service.findMarketCapSchemesByMgrCode(new RemotingContext(), "code");
+
+        assertNotNull(result);
+    }
+
+    @Test
+    public void findPartiesByIds_shouldNotBeNull() {
+        ClientMasterLookupService_C service = new ClientMasterLookupService_C(null);
+        List<IPartyShort> result = service.findPartiesByIds(Arrays.asList(1L), true, new RemotingContext());
+
+        assertNotNull(result);
+    }
+
+    @Test
+    public void findPortfolioEligibleAccountPartiesByIds_shouldNotBeNull() {
+        ClientMasterLookupService_C service = new ClientMasterLookupService_C(null);
+        Set<IPartyShort> result = service.findPortfolioEligibleAccountPartiesByIds(Collections.singleton(1L));
+
+        assertNotNull(result);
+    }
+}
