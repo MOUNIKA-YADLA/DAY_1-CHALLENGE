@@ -1,0 +1,58 @@
+package com.bnpp.pb.puma.rest.client;
+
+import static org.junit.Assert.*;
+import java.util.*;
+import org.junit.Test;
+
+public class ClientMasterLookupService_CTest {
+
+    @Test
+    public void deleteClientReportDefinitionByFileKey_shouldNotBeNull() {
+        ClientMasterLookupService_C service = new ClientMasterLookupService_C(null);
+        ClientReportDefinition result = service.deleteClientReportDefinitionByFileKey("fileKey");
+
+        assertEquals("fileKey", result.getFileKey()); // assert the fileKey is set
+    }
+
+    @Test
+    public void deleteReportSubscription_shouldNotBeNull() {
+        ClientMasterLookupService_C service = new ClientMasterLookupService_C(null);
+        ReportSubscription dummy = new ReportSubscription();
+
+        ReportSubscription result = service.deleteReportSubscription(dummy);
+
+        assertTrue(result.isDeleted()); // assert that it's marked as deleted
+    }
+
+    @Test
+    public void deleteReportSubscriptionList_shouldNotBeNullForSingleList() {
+        ClientMasterLookupService_C service = new ClientMasterLookupService_C(null);
+        ReportSubscription dummy = new ReportSubscription();
+
+        List<ReportSubscription> result = service.deleteReportSubscriptionList(Arrays.asList(dummy));
+
+        assertEquals(1, result.size()); // assert the size is 1
+    }
+
+    @Test
+    public void deleteReportSubscriptionList_shouldNotBeNullForListWithExchange() {
+        ClientMasterLookupService_C service = new ClientMasterLookupService_C(null);
+        List<ReportSubscription> dummyList = new ArrayList<>();
+        dummyList.add(new ReportSubscription());
+
+        List<ReportSubscription> result = service.deleteReportSubscriptionList(dummyList);
+
+        assertEquals(dummyList.size(), result.size()); // assert the sizes match
+    }
+
+    @Test
+    public void findPortfolioEligibleAccountPartiesByIds_shouldNotBeEmpty() {
+        ClientMasterLookupService_C service = new ClientMasterLookupService_C(null);
+        Set<Long> ids = new HashSet<>();
+        ids.add(1L);
+
+        Set<PartyShort> result = service.findPortfolioEligibleAccountPartiesByIds(ids);
+
+        assertFalse(result.isEmpty()); // assert it's not empty
+    }
+}
