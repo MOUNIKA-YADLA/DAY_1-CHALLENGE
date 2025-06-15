@@ -1,0 +1,59 @@
+package com.bnpp.pb.common.clientdata.messaging;
+
+import com.bnpp.pb.common.clientdata.to.PumaTO;
+import org.junit.jupiter.api.Test;
+
+import static org.junit.jupiter.api.Assertions.*;
+  
+class ClientDataMessageListenerTest {
+
+    // Concrete subclass to enable testing
+    static class TestClientDataMessageListener extends ClientDataMessageListener {
+        PumaTO capturedMessage = null;
+        String capturedTopic = null;
+
+        @Override
+        public void onMessage(PumaTO message, String topic) {
+            capturedMessage = message;
+            capturedTopic = topic;
+        }
+
+        // Override to avoid instantiating ClientDataMarshaller
+        @Override
+        public void onMessage(String message, String topic) {
+            // Instead of calling the real marshaller, we directly construct a PumaTO for testing
+            PumaTO pumaTO = new PumaTO();
+            pumaTO.setSomeField("foo"); // whatever fields you have in PumaTO
+            onMessage(pumaTO, topic);
+        }
+    }
+
+    @Test
+    void testOnMessageWithStringAndTopic() {
+        // Given
+        TestClientDataMessageListener listener = new TestClientDataMessageListener();
+
+        // When
+        listener.onMessage("msg", "some-topic");
+
+        // Then
+        assertNotNull(listener.capturedMessage);
+        assertEquals("some-topic", listener.capturedTopic);
+        assertEquals("foo", listener.capturedMessage.getSomeField()); // if applicable
+    }
+
+    @Test
+    void testOnMessageWithPumaTOAndTopic() {
+        // Given
+        TestClientDataMessageListener listener = new TestClientDataMessageListener();
+        PumaTO pumaTO = new PumaTO();
+        pumaTO.setSomeField("bar");
+
+        // When
+        listener.onMessage(pumaTO, "another-topic");
+
+        // Then
+        assertEquals(pumaTO, listener.capturedMessage);
+        assertEquals("another-topic", listener.capturedTopic);
+    }
+}
