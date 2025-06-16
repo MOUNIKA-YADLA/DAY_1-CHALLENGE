@@ -1,0 +1,115 @@
+public class TestClientMasterLookupWS_C extends IClientMasterLookupWS_C {
+
+    private ClientTemplate fakeClient;
+
+    TestClientMasterLookupWS_C(ClientTemplate fakeClient) {
+        super(fakeClient);
+        this.fakeClient = fakeClient;
+    }
+
+    @Override
+    protected ClientTemplate getClientTemplate(){
+        return fakeClient;
+    }
+}
+
+
+
+public class FakeClientTemplate extends ClientTemplate {
+
+    private boolean isPostForTradingEligibility = false;
+    private boolean isPostForTradingEligibilityList = false;
+    private boolean isPostForLookup = false;
+
+    @Override
+    public MultiValueMap<String, Object> getRestMap(){
+        return new LinkedMultiValueMap<>();
+    }
+
+    @Override
+    public MultiValueMap<String, Object> getHeaders(){
+        return new LinkedMultiValueMap<>();
+    }
+
+    @Override
+    public HttpEntity<MultiValueMap<String, Object>> createRequest(MultiValueMap<String, Object> map, MultiValueMap<String, Object> headers){
+        return new HttpEntity<>(map, headers);
+    }
+
+    @Override
+    public ResponseEntity<TradingEligibility> postForTradingEligibility(String url, HttpEntity<MultiValueMap<String, Object>> request){
+        isPostForTradingEligibility = true;
+        return new ResponseEntity<>(new TradingEligibility(), HttpStatus.OK);
+    }
+
+    @Override
+    public ResponseEntity<List<TradingEligibility>> postForTradingEligibilityList(String url, HttpEntity<MultiValueMap<String, Object>> request){
+        isPostForTradingEligibilityList = true;
+        List<TradingEligibility> list = new ArrayList<>();
+        list.add(new TradingEligibility()); // dummy
+        return new ResponseEntity<>(list, HttpStatus.OK);
+    }
+
+    @Override
+    public ResponseEntity<EntitledResources> postForEntitledResources(String url, HttpEntity<MultiValueMap<String, Object>> request){
+        isPostForLookup = true;
+        return new ResponseEntity<>(new EntitledResources(), HttpStatus.OK);
+    }
+
+    // getters to assert
+    boolean isPostForTradingEligibility(){
+        return isPostForTradingEligibility;
+    }
+
+    boolean isPostForTradingEligibilityList(){
+        return isPostForTradingEligibilityList;
+    }
+
+    boolean isPostForLookup(){
+        return isPostForLookup;
+    }
+}
+
+
+
+
+import org.junit.Assert;
+import org.junit.Test;
+
+import java.util.*;
+import org.springframework.http.ResponseEntity;
+
+public class IClientMasterLookupWSCTest {
+
+    @Test
+    public void testGetTradingEligibility(){
+        FakeClientTemplate fake = new FakeClientTemplate();
+        TestClientMasterLookupWS_C controller = new TestClientMasterLookupWS_C(fake);
+        TradingEligibilityInput input = new TradingEligibilityInput();
+
+        TradingEligibility result = controller.getTradingEligibility(input);
+        Assert.assertNotNull(result);
+        Assert.assertTrue(fake.isPostForTradingEligibility()); // validates path was called
+    }
+
+    @Test
+    public void testGetTradingEligibilityList(){
+        FakeClientTemplate fake = new FakeClientTemplate();
+        TestClientMasterLookupWS_C controller = new TestClientMasterLookupWS_C(fake);
+        List<TradingEligibilityInput> inputList = Collections.singletonList(new TradingEligibilityInput());
+
+        List<TradingEligibility> result = controller.getTradingEligibilityList(inputList);
+        Assert.assertNotNull(result);
+        Assert.assertEquals(1, result.size()); // validates we got a non-empty list
+        Assert.assertTrue(fake.isPostForTradingEligibilityList()); // validates path was called
+    }
+
+    @Test
+    public void testLookupEntitlementByUserAndApplication(){
+        FakeClientTemplate fake = new FakeClientTemplate();
+        TestClientMasterLookupWS_C controller = new TestClientMasterLookupWS_C(fake);
+        EntitledResources result = controller.lookupEntitlementByUserAndApplication("userId", "applicationCode", true);
+        Assert.assertNotNull(result);
+        Assert.assertTrue(fake.isPostForLookup()); // validates path was called
+    }
+}
