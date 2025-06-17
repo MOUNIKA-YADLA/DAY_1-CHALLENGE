@@ -1,0 +1,107 @@
+import static org.junit.Assert.*;
+import org.junit.Test;
+
+public class ClientDataLoaderTest {
+
+    @Test(timeout = 4000)
+    public void testLoadSites_shouldNotThrowException()
+            throws Exception {
+        ClientDataLoader loader = new ClientDataLoader();
+
+        loader.loadSites();
+
+        // If we reach here, the method executes without exception
+    }
+
+    @Test(timeout = 4000)
+    public void testLoadSite_shouldNotThrowException()
+            throws Exception {
+        ClientDataLoader loader = new ClientDataLoader();
+
+        loader.loadSite("siteId");
+
+        // If we reach here, the method executes without exception
+    }
+
+    @Test(timeout = 4000)
+    public void testLoadSite_shouldThrowException()
+            throws Exception {
+        ClientDataLoader loader = new ClientDataLoader();
+
+        try {
+            loader.loadSite(null);
+            fail("Expected IllegalArgumentException.");
+        } catch (IllegalArgumentException e) {
+            // Exception was expected
+        }
+    }
+
+    @Test(timeout = 4000)
+    public void testLoadHub_shouldNotThrowException()
+            throws Exception {
+        ClientDataLoader loader = new ClientDataLoader();
+
+        loader.loadHub("hubId");
+
+        // If we reach here, the method executes without exception
+    }
+
+    @Test(timeout = 4000)
+    public void testLoadHub_shouldThrowException()
+            throws Exception {
+        ClientDataLoader loader = new ClientDataLoader();
+
+        try {
+            loader.loadHub(null);
+            fail("Expected IllegalArgumentException.");
+        } catch (IllegalArgumentException e) {
+            // Exception was expected
+        }
+    }
+
+    @Test(timeout = 4000)
+    public void testLoadGroups_shouldNotThrowException()
+            throws Exception {
+        ClientDataLoader loader = new ClientDataLoader();
+
+        loader.loadGroups("groupId");
+
+        // If we reach here, the method executes without exception
+    }
+
+    @Test(timeout = 4000)
+    public void testLoadGroups_shouldThrowException()
+            throws Exception {
+        ClientDataLoader loader = new ClientDataLoader();
+
+        try {
+            loader.loadGroups(null);
+            fail("Expected IllegalArgumentException.");
+        } catch (IllegalArgumentException e) {
+            // Exception was expected
+        }
+    }
+
+    @Test(timeout = 4000)
+    public void testLoadUsers_shouldNotThrowException()
+            throws Exception {
+        ClientDataLoader loader = new ClientDataLoader();
+
+        loader.loadUsers("userId");
+
+        // If we reach here, the method executes without exception
+    }
+
+    @Test(timeout = 4000)
+    public void testLoadUsers_shouldThrowException()
+            throws Exception {
+        ClientDataLoader loader = new ClientDataLoader();
+
+        try {
+            loader.loadUsers(null);
+            fail("Expected IllegalArgumentException.");
+        } catch (IllegalArgumentException e) {
+            // Exception was expected
+        }
+    }
+}
