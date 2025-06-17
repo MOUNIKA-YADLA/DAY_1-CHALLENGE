@@ -1,0 +1,52 @@
+package com.bnpp.pb.common.clientdata.lookup.whtax;
+
+import com.bnpp.pb.common.clientdata.intf.ISite;
+import com.bnpp.pb.common.clientdata.intf.IHub;
+import com.bnpp.pb.common.clientdata.lookup.ClientDataLoader;
+
+import org.junit.Before;
+import org.junit.Test;
+
+import java.util.*;
+  
+import static org.junit.Assert.*;
+import static org.mockito.Mockito.mock;
+
+public class ClientDataLoaderTest {
+
+    private ClientDataLoader loader;
+
+    @Before
+    public void setUp(){
+        loader = new ClientDataLoader();
+    }
+
+    @Test(timeout = 4000)
+    public void testLoadSites_shouldNotThrowException(){
+        loader.loadSites();
+    }
+
+    @Test
+    public void testLoadSite_shouldNotThrowException(){
+        ISite mockSite = mock(ISite.class);
+        loader.loadSite(mockSite);
+    }
+
+    @Test
+    public void testLoadGroups_shouldNotThrowException(){
+        List<Long> groupIds = Arrays.asList(1L, 2L, 3L);
+        loader.loadGroups(groupIds);
+    }
+
+    @Test
+    public void testLoadHub_shouldNotThrowException(){
+        IHub mockHub = mock(IHub.class);
+        loader.loadHub(mockHub);
+    }
+
+    @Test
+    public void testLoadUsers_shouldNotThrowException(){
+        Set<String> userIds = new HashSet<>(Arrays.asList("user1", "user2"));
+        loader.loadUsers(userIds);
+    }
+}
