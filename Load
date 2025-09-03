@@ -1,0 +1,20 @@
+@GetMapping("/download/{filename:.+}")
+@ResponseBody
+public ResponseEntity<Resource> downloadFile(@PathVariable String filename) {
+    try {
+        Path filePath = Paths.get(uploadDir).resolve(filename).normalize();
+        Resource resource = new UrlResource(filePath.toUri());
+
+        if (!resource.exists()) {
+            return ResponseEntity.notFound().build();
+        }
+
+        return ResponseEntity.ok()
+                .contentType(MediaType.APPLICATION_OCTET_STREAM)
+                .header(HttpHeaders.CONTENT_DISPOSITION, "attachment; filename=\"" + resource.getFilename() + "\"")
+                .body(resource);
+
+    } catch (Exception e) {
+        return ResponseEntity.internalServerError().build();
+    }
+}
