@@ -1,0 +1,387 @@
+package com.puma.controller;
+
+import com.puma.model.UploadFile;
+import com.puma.service.FileStorageService;
+import org.springframework.stereotype.Controller;
+import org.springframework.ui.Model;
+import org.springframework.web.bind.annotation.*;
+import org.springframework.web.multipart.MultipartFile;
+
+import java.util.List;
+
+@Controller
+public class FileUploadController {
+
+    private final FileStorageService fileStorageService;
+
+    public FileUploadController(FileStorageService fileStorageService) {
+        this.fileStorageService = fileStorageService;
+    }
+
+    @GetMapping("/")
+    public String index(@RequestParam(defaultValue = "1") int page, Model model) {
+        List<UploadFile> allFiles = fileStorageService.loadAllFiles();
+        int pageSize = 10;
+        int totalPages = (int) Math.ceil((double) allFiles.size() / pageSize);
+
+        int start = (page - 1) * pageSize;
+        int end = Math.min(start + pageSize, allFiles.size());
+
+        List<UploadFile> files = allFiles.subList(start, end);
+
+        model.addAttribute("files", files);
+        model.addAttribute("currentPage", page);
+        model.addAttribute("totalPages", totalPages);
+        return "upload";
+    }
+
+    @PostMapping("/upload")
+    public String uploadFile(@RequestParam("file") MultipartFile file, Model model) {
+        try {
+            fileStorageService.storeFile(file);
+            model.addAttribute("message", "✅ File uploaded successfully: " + file.getOriginalFilename());
+        } catch (Exception e) {
+            model.addAttribute("message", "❌ File upload failed: " + e.getMessage());
+        }
+        return "redirect:/";
+    }
+
+    @GetMapping("/files/{filename}")
+    @ResponseBody
+    public org.springframework.core.io.Resource getFile(@PathVariable String filename) {
+        return fileStorageService.loadFileAsResource(filename);
+    }
+
+    @PostMapping("/delete/{filename}")
+    public String deleteFile(@PathVariable String filename, Model model) {
+        try {
+            fileStorageService.deleteFile(filename);
+            model.addAttribute("message", "🗑️ File deleted successfully: " + filename);
+        } catch (Exception e) {
+            model.addAttribute("message", "❌ Could not delete file: " + e.getMessage());
+        }
+        return "redirect:/";
+    }
+}
+
+
+
+
+
+package com.puma.model;
+
+import java.time.LocalDateTime;
+
+public class UploadFile {
+    private String fileName;
+    private long size;
+    private LocalDateTime uploadedAt;
+
+    public UploadFile(String fileName, long size, LocalDateTime uploadedAt) {
+        this.fileName = fileName;
+        this.size = size;
+        this.uploadedAt = uploadedAt;
+    }
+
+    public String getFileName() {
+        return fileName;
+    }
+
+    public long getSize() {
+        return size;
+    }
+
+    public LocalDateTime getUploadedAt() {
+        return uploadedAt;
+    }
+
+    public String getReadableSize() {
+        if (size < 1024) return size + " B";
+        int exp = (int) (Math.log(size) / Math.log(1024));
+        String pre = "KMGTPE".charAt(exp - 1) + "";
+        return String.format("%.1f %sB", size / Math.pow(1024, exp), pre);
+    }
+}
+
+
+
+package com.puma.service;
+
+import com.puma.exception.FileStorageException;
+import com.puma.model.UploadFile;
+import org.springframework.beans.factory.annotation.Value;
+import org.springframework.core.io.Resource;
+import org.springframework.core.io.UrlResource;
+import org.springframework.stereotype.Service;
+import org.springframework.util.StringUtils;
+import org.springframework.web.multipart.MultipartFile;
+
+import java.io.IOException;
+import java.net.MalformedURLException;
+import java.nio.file.*;
+import java.time.LocalDateTime;
+import java.util.List;
+import java.util.stream.Collectors;
+import java.util.stream.Stream;
+
+@Service
+public class FileStorageService {
+
+    private final Path fileStorageLocation;
+
+    public FileStorageService(@Value("${file.upload-dir:uploads}") String uploadDir) {
+        this.fileStorageLocation = Paths.get(uploadDir).toAbsolutePath().normalize();
+        try {
+            Files.createDirectories(this.fileStorageLocation);
+        } catch (Exception ex) {
+            throw new FileStorageException("Could not create upload directory!", ex);
+        }
+    }
+
+    public void storeFile(MultipartFile file) {
+        String fileName = StringUtils.cleanPath(file.getOriginalFilename());
+        try {
+            if (fileName.contains("..")) {
+                throw new FileStorageException("Invalid file path: " + fileName);
+            }
+            Path targetLocation = this.fileStorageLocation.resolve(fileName);
+            Files.copy(file.getInputStream(), targetLocation, StandardCopyOption.REPLACE_EXISTING);
+        } catch (IOException ex) {
+            throw new FileStorageException("Could not store file " + fileName, ex);
+        }
+    }
+
+    public List<UploadFile> loadAllFiles() {
+        try (Stream<Path> stream = Files.list(this.fileStorageLocation)) {
+            return stream.filter(Files::isRegularFile)
+                         .map(path -> {
+                             try {
+                                 return new UploadFile(
+                                     path.getFileName().toString(),
+                                     Files.size(path),
+                                     LocalDateTime.ofInstant(Files.getLastModifiedTime(path).toInstant(),
+                                                             java.time.ZoneId.systemDefault())
+                                 );
+                             } catch (IOException e) {
+                                 return null;
+                             }
+                         })
+                         .filter(f -> f != null)
+                         .sorted((a, b) -> b.getUploadedAt().compareTo(a.getUploadedAt())) // newest first
+                         .collect(Collectors.toList());
+        } catch (IOException e) {
+            return List.of();
+        }
+    }
+
+    public Resource loadFileAsResource(String fileName) {
+        try {
+            Path filePath = this.fileStorageLocation.resolve(fileName).normalize();
+            Resource resource = new UrlResource(filePath.toUri());
+            if (resource.exists()) {
+                return resource;
+            } else {
+                throw new FileStorageException("File not found " + fileName);
+            }
+        } catch (MalformedURLException ex) {
+            throw new FileStorageException("File not found " + fileName, ex);
+        }
+    }
+
+    public void deleteFile(String fileName) {
+        try {
+            Path targetLocation = this.fileStorageLocation.resolve(fileName).normalize();
+            Files.deleteIfExists(targetLocation);
+        } catch (IOException e) {
+            throw new FileStorageException("Could not delete file " + fileName, e);
+        }
+    }
+}
+
+
+
+
+
+
+
+<!DOCTYPE html>
+<html xmlns:th="http://www.thymeleaf.org">
+<head>
+    <title>File Upload Portal</title>
+    <style>
+        :root {
+            --green: #008000;
+            --dark-green: #006400;
+            --gray: #f4f4f4;
+            --dark-gray: #333;
+            --white: #fff;
+            --red: #c0392b;
+        }
+        body {
+            font-family: 'Segoe UI', sans-serif;
+            background: var(--gray);
+            margin: 0;
+            display: flex;
+        }
+        .sidebar {
+            width: 220px;
+            background: var(--green);
+            color: var(--white);
+            height: 100vh;
+            position: fixed;
+            left: 0; top: 0;
+            padding-top: 20px;
+            box-shadow: 2px 0 8px rgba(0,0,0,0.1);
+        }
+        .sidebar h2 {
+            text-align: center;
+            margin-bottom: 30px;
+        }
+        .sidebar a {
+            display: block;
+            color: var(--white);
+            padding: 12px 20px;
+            text-decoration: none;
+        }
+        .sidebar a:hover { background: var(--dark-green); }
+        .main-content {
+            margin-left: 220px;
+            padding: 30px;
+            width: 100%;
+        }
+        .card {
+            background: var(--white);
+            border-radius: 8px;
+            padding: 25px;
+            box-shadow: 0 3px 8px rgba(0,0,0,0.1);
+            margin-bottom: 20px;
+        }
+        .upload-btn {
+            background: var(--green);
+            color: var(--white);
+            padding: 10px 18px;
+            border: none;
+            border-radius: 5px;
+            cursor: pointer;
+        }
+        .upload-btn:hover { background: var(--dark-green); }
+        .delete-btn {
+            background: var(--red);
+            color: var(--white);
+            padding: 6px 12px;
+            border: none;
+            border-radius: 4px;
+            cursor: pointer;
+            font-size: 14px;
+        }
+        .delete-btn:hover { background: darkred; }
+        .message { margin-top: 15px; font-weight: bold; color: var(--dark-gray); }
+        table { width: 100%; border-collapse: collapse; margin-top: 15px; }
+        th, td { padding: 10px; text-align: left; border-bottom: 1px solid #ddd; }
+        th { background: var(--green); color: var(--white); }
+        tr:hover { background: #f1f1f1; }
+        .download-link { color: var(--green); text-decoration: none; font-weight: bold; }
+        .download-link:hover { text-decoration: underline; }
+        .pagination { margin-top: 20px; text-align: center; }
+        .pagination a {
+            margin: 0 5px;
+            padding: 8px 14px;
+            background: var(--green);
+            color: var(--white);
+            text-decoration: none;
+            border-radius: 4px;
+        }
+        .pagination a.active { background: var(--dark-green); }
+        .pagination a:hover { background: var(--dark-green); }
+    </style>
+</head>
+<body>
+    <div class="sidebar">
+        <h2>File Portal</h2>
+        <a href="/">📂 Upload</a>
+        <a href="#">📊 Reports</a>
+        <a href="#">⚙️ Settings</a>
+    </div>
+
+    <div class="main-content">
+        <div class="card">
+            <h2>Upload Excel File</h2>
+            <form method="post" enctype="multipart/form-data" th:action="@{/upload}">
+                <input type="file" name="file" accept=".xls,.xlsx" required>
+                <button type="submit" class="upload-btn">Upload</button>
+            </form>
+            <div class="message" th:if="${message}" th:text="${message}"></div>
+        </div>
+
+        <div class="card">
+            <h2>Uploaded Files</h2>
+            <table>
+                <thead>
+                    <tr>
+                        <th>File Name</th>
+                        <th>Size</th>
+                        <th>Uploaded At</th>
+                        <th>Download</th>
+                        <th>Delete</th>
+                    </tr>
+                </thead>
+                <tbody>
+                    <tr th:each="f : ${files}">
+                        <td th:text="${f.fileName}"></td>
+                        <td th:text="${f.readableSize}"></td>
+                        <td th:text="${#temporals.format(f.uploadedAt, 'yyyy-MM-dd HH:mm:ss')}"></td>
+                        <td><a class="download-link" th:href="@{/files/{f}(f=${f.fileName})}">Download</a></td>
+                        <td>
+                            <form th:action="@{/delete/{f}(f=${f.fileName})}" method="post" style="display:inline;">
+                                <button type="submit" class="delete-btn">🗑 Delete</button>
+                            </form>
+                        </td>
+                    </tr>
+                    <tr th:if="${#lists.isEmpty(files)}">
+                        <td colspan="5">No files uploaded yet.</td>
+                    </tr>
+                </tbody>
+            </table>
+
+            <div class="pagination" th:if="${totalPages > 1}">
+                <a th:if="${currentPage > 1}" th:href="@{/(page=${currentPage-1})}">⬅ Prev</a>
+                <span th:each="i : ${#numbers.sequence(1, totalPages)}">
+                    <a th:href="@{/(page=${i})}" th:text="${i}" th:classappend="${i==currentPage}? 'active'"></a>
+                </span>
+                <a th:if="${currentPage < totalPages}" th:href="@{/(page=${currentPage+1})}">Next ➡</a>
+            </div>
+        </div>
+    </div>
+</body>
+</html>
+
+
+
+
+# =========================================================
+# Application Configuration
+# =========================================================
+
+# Server port
+server.port=8080
+
+# Upload directory (relative to project root or absolute path)
+file.upload-dir=uploads
+
+# Multipart upload limits
+spring.servlet.multipart.max-file-size=20MB
+spring.servlet.multipart.max-request-size=20MB
+
+# Thymeleaf settings
+spring.thymeleaf.cache=false
+spring.thymeleaf.enabled=true
+spring.thymeleaf.prefix=classpath:/templates/
+spring.thymeleaf.suffix=.html
+spring.thymeleaf.mode=HTML
+
+# Logging
+logging.level.root=INFO
+logging.level.com.puma=DEBUG
+
+# Banner (hide default Spring Boot banner if not needed)
+spring.main.banner-mode=console
